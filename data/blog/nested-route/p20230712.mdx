@@ -1,0 +1,81 @@
+---
+title: '[포스코x코딩온] 웹개발자 풀스택 과정 2주차 회고 | 자바스크립트'
+date: '2023-07-12 13:07:04'
+tags: ['Javascript']
+draft: false
+summary: '자바스크립트 기초 및 내장 메소드(문자열, 배열), 반복문과 DOM 의 개념과 요소선택을 하는 자바스크립트 문법'
+---
+
+<strong>HTMLCollection과 NodeList ?</strong> <br />
+요소 선택자 중 querySelectorAll,getElementsByName와 getElementsByClassName, getElementsByTagName 를
+console.log로 찍어보면 전자는 NodeList, 후자는 HTMLCollection 인것으로 확인할 수 있다.
+
+![htmlcollection](/static/images/htmlcollection.png)
+
+![nodelist](/static/images/nodelist.png)
+
+이것들은 무엇이고 둘의 차이점은 어떤것이 있을까?
+
+우선 둘의 공통점은 DOM 요소를 유사 배열객체이면서 이터러블이다. 따라서 for ...of 문으로 순회할 수 있으며 스프레드 문법을 사용하여 간단히 배열로 변환할 수 있다.
+
+따라서 해당 선택자를 사용할 때는 배열 인덱스를 사용하여 선택을 해야한다. 예시는 아래와 같다.
+
+```
+ let button = document.getElementsByTagName("button");
+ console.log("button : ", button[0]);
+ button[0].classList.add("d-none");
+```
+
+그렇다면 둘의 차이점은 무엇일까? <br/>
+우선 HTMLCollection은 동적 배열이다. 문서가 바뀔 때마다 실시간으로 업데이트가 된다. 일종의 가상의 배열이다. 반대로 NodeList는 정적인 배열이다. 따라서 실시간으로 변경되어도 반영되지 않는다. 여기서 의문이 들었다. 그렇다면 HTMLCollection은
+
+1. 일종의 가상 DOM 이라고 볼수 있는 것인가? 그렇다면
+2. 웹페이지가 랜더링 될 때 어떤 것이 좀 더 최적화하는것이 좋을까?
+3. 아니면 그냥 사용법에 따라 다른것일까? 1번의 의문점에 대해 찾아보았으나 명확하게 나와있는 자료가 없었기 때문에 좀 더 알아봐야 할 것 같다. 2번 역시 1번과 마찬가지였다. (사실 웹 최적화 및 랜더링에 관해서 Deep하게 공부하지 않았기에 2번의 의문 자체가 논외일 수도 있다.)
+   3번에 대한 의문의 답은 다음과 같다. 위 공통점에서 보았듯이, 둘다 유사 배열이지 진짜 배열이 아니다. 따라서 예상과 다르게 동작할 때가 있다.
+
+HTMLCollection에서 발생하는 부작용은 아래와 같다.
+
+```
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Parcel Sandbox</title>
+    <meta charset="UTF-8" />
+  </head>
+  <style>
+    .red {
+      color: red;
+    }
+    .blue {
+      color: blue;
+    }
+  </style>
+  <body>
+    <div id="app"></div>
+  </body>
+  <ul ic="fruits">
+    <li class="red">apple</li>
+    <li class="red">banana</li>
+    <li class="red">Orange</li>
+  </ul>
+  <script>
+    const $elems = document.getElementsByClassName("red");
+    console.log($elems);
+
+    for (let i = 0; i < $elems.length; i++) {
+      $elems[i].className = "blue"; //red로 된 class이름을 모두 blue로 변경한다.
+    }
+
+    console.lot($elems);
+  </script>
+</html>
+```
+
+코드 실행결과▼
+
+![done](/static/images/done.png)
+
+HTMLCollection은 실시간으로 노드 객체 상태를 반영하기 때문에 위와 같은 부작용이 발생한다. HTMLCollection의 부작용을 해결하기 위해 NodeList를 사용하는 방법도 있다. 그러나 childNodes 가 반환하는 객체는 HTMLCollection과 같이 실시간으로 노드 객체 상태를 반영하므로 위와 같은 부작용이 발생할 수 있다. **결국 안정성과 효율성을 위해서는 DOM 컬렉션을 사용하려면 객체를 배열로 변환하여 사용하는 것을 권장한다.**
+
+#출처: https://developer.mozilla.org/ko/docs/Web/API/HTMLCollection #출처: 이웅모 저. 모던 자바스크립트 Deep Dive

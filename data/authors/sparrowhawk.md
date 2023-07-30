@@ -1,5 +1,5 @@
 ---
-name: Sparrow Hawk
+name: 페이지 1
 avatar: /static/images/sparrowhawk-avatar.jpg
 occupation: Wizard of Earthsea
 company: Earthsea
