@@ -1,0 +1,186 @@
+---
+title: 동적form과 비동기통신 | node.js
+date: '2023-08-03'
+tags: ['[포스코x코딩온] 웹개발자 풀스택 과정', '5주차', 'node.js', 'javascript']
+draft: false
+summary: form 전송방법 중 비동기 통신 방법을 배우고 node.js를 통해 프론트와 데이터 통신방법을 배움.
+---
+
+<strong>동적Form?</strong>
+
+    form 전송 시 `<input type ="submit">` 혹은 `<button type = "submit">` 이면 새로운 페이지로 이동된다. 이를 막기 위해 비동기 통신으로 서버와 데이터를 주고 받는다. 그러면 클라이언트 입장에서는 번거롭게 페이지 전환할 필요도 없고 페이지가 전환 되면서 새로 렌더링 하는 과정 또한 생략되어 효율적이다.<br/>
+    따라서 form을 만들때는 기본적으로 `<form action="/데이터를 보낼url" method="post">`로 만드나 동적 form으로 만든다면 `<form name="register">` 이렇게 form에 name을 설정하여 자바스크립트 `document.forms['register'];` 로 form을 선택할 수 있다. <br/>
+
+    <strong>비동기 통신?</strong> <br/>
+
+    위에 언급되었던 비동기 통신의 방법으로는 Ajax, Axios, Fetch 3가지 방법이 있다. Ajax는 jQuery 기반으로 구현하여 쉽게 사용이 가능하나, 연속으로 데이터를 요청하면 서버 부하가 증가할 수 있고 http 클라이언트의 기능이 한정되어 있는 등 여러가지 기능상 문제가 있기에 현재는 잘 쓰이지 않는다고 한다. (개인적인 의견으로는 만약 Ajax로 가져온 데이터를 html에 동적으로 삽입하겠다면 Axios나 다른 방법을 추천하겠다. 예전에 지도 API를 사용하느라 어쩔수 없이 썼던 방법이였지만 정말 비효율적이였다. 그때 Axios를 알았다면 이것을 썼을것이다. 코드 가독성도 많이 떨어졌었고 데이터를 불러오는게 시원치 않았다.) Ajax 다음에 나온것이 fetch이다. promise 기반으로 나온 자바스크립트 자체의 내장 함수로서 브라우저에서 사용이 가능하다. 그러나 한정된 기능으로 역시 잘 사용하지 않는다고 한다. 다음엔 Axios이다. 앞서말한 두가지 방법보다 더욱 널리 사용되며 더욱 간편한 문법과 브라우저 환경과 node.js에서 사용할 수 있다는점, 자동으로 에러를 처리하고 기본적으로 CSRF(Cross-Site Request Forgery) 보호 기능이 활성화되어있다는 점 등 다양한 기능을 제공한다. 이런 이유로 Axios를 이용한 실습이 진행되었다.(아직 코린이라 그런지 ajax와 비교했을 때 문법이 간결한지는 체감이 잘 되지 않는다.. 좀 더 복잡한 로직을 써볼때 체감하지 않을까.)
+
+    <strong>GET/POST ?</strong><br/>
+    Http 메서드로 클라이언트에서 서버로 데이터요청 시 사용한다. get은 쿼리스트링에 파리미터가 붙어서 전달되기 때문에 보안에 취약하다. 따라서 회원가입이나 로그인 같이 민감한 정보는 post를 사용해야한다. 또한 용량이 큰 데이터를 보낼때도 사용된다고 한다.
+
+    <strong>그래서 무엇을 만들수 있는지?<br/></strong>
+    위 내용을 기반으로 실습한 예제이다.
+    <Image src="/static/images/axiosGet1.gif" width={300} height={190} />
+
+    axios Get 회원가입의 예제의 경우는 checkbox의 선택된 값을 가져오는 것을 몰라서 헤맸는데 알고보니 배열로 가져와야 하는 거였다. input type='radio'일때는 그냥 가져올수 있었는데 체크박스는 배열로 가져오는것이 신기하면서도 곰곰히 생각해보니 체크박스는 여러개의 값을 체크할 수 있으니 배열로 가져오는것이 맞는거 같다.
+    (번외로 회원가입 같은 기능은 get이 아닌 post로 구현하는게 맞다..) 아래는 체크박스 데이터를 가져오는 코드이다.
+
+    ```
+    "front- html"
+    ...생략...
+    <fieldset>
+        <legend>관심사</legend>
+        <input type="checkbox" name="hobby" id="travle" value="여행" />
+        <label for="travle">여행</label>
+        <input type="checkbox" name="hobby" id="fashion" value="패션" />
+        <label for="fashion">패션</label>
+        <input type="checkbox" name="hobby" id="food" value="음식" />
+        <label for="food">음식</label>
+      </fieldset>
+    ```
+    ```
+    "front- 자바스크립트"
+    <script>
+      const form = document.forms["register"];
+      const formId = document.getElementById("register");
+      const hobby = [];
+      const resultBox = document.querySelector(".result");
+
+      function axiosGet() {
+        const checked = formId.querySelectorAll(
+          'input[type="checkbox"]:checked'
+        );
+        checked.forEach((elem) => {
+          hobby.push(elem.value);
+        });
+        console.log("hobby", hobby);
+      }  .. 이하 생략..
+    ```
+    ```
+    "back- node.js"
+    ...생략...
+    //axios
+
+    app.get("/axiosGet", (req, res) => {
+    console.log("back", req.query);
+    res.send(req.query);
+    });
+
+    ```
+    get은 쿼리스트링으로 데이터를 보내기 때문에 back단에서 데이터를 받아서 보낼때는 req.query로 보내야한다.
+    번외로
+    hobby 값은 아래의 구문으로도 가져올 수 있다.
+
+    ```
+    hobby: [...form.querySelectorAll("input[name=hobby]:checked")]
+    .map((input) => input.value)
+    .join(", "),
+    ```
+
+    여기서 ...form의 ...은 스프레드 연산자이다.
+    기존 배열이나 객체의 전체 또는 일부를 다른 배열이나 객체로 빠르게 복사 할 수 있다. 기존의 concat보다 간편하고 깔끔하게 병합이 된다고 한다. 다음 map함수를 이용하여 선택된 체크박스의 값을 추출하고 join함수를 통해 문자열로 결합한다. ","으로 구분한다.
+    console.log로 찍어보면 아래와 같이 체크된 값이 나오는 것을 확인할 수 있다.
+
+<Image src="/static/images/hobby.png" width={300} height={180} />
+
+    또 다른 예제로는 POST 회원가입이 있다.
+    <Image src="/static/images/example1.gif" width={300} height={200} />
+
+    마찬가지로 동적form으로 데이터를 주고받는다. 나같은 경우에는 post 회원가입을 만드는데 함수를 2개 만들어서 구현하였다.
+
+    ```
+    "front- 자바스크립트"
+    <script>
+      ...생략...
+      let flag = 0;
+      let username = "";
+      let userpw = ""; //전역변수로 설정
+
+      function axiosPost() {
+        console.log("axios post");
+        const data = {
+          name: form.name.value,
+          password: form.password.value,
+          flag,
+        };
+
+        function result1() {
+          return axios({
+            method: "POST",
+            url: "/axiosPost",
+            data,
+          }).then((res) => {
+            resultBox.textContent = `회원가입이 완료되었습니다. 다시 로그인해주세요. `;
+            resultBox.style.color = "green";
+            flag = 1;
+            console.log("실행완료1", flag, username, userpw);
+            return;
+          });
+        }
+
+        function result2(username, userpw) {
+          return axios({
+            method: "POST",
+            url: "/axiosPost",
+            data,
+          }).then((res) => {
+            console.log("실행완료2");
+            if (res.data.name != username && res.data.password == userpw) {
+              resultBox.textContent = `아이디를 다시 입력하세요`;
+              resultBox.style.color = "red";
+              console.log("실패", res.data.name); }
+                    ...생략...
+            else {
+              resultBox.textContent = `로그인 성공`;
+              resultBox.style.color = "blue";
+              console.log("성공", res.data.name, res.data.password);
+            }
+          });
+        }
+        if (username == "" || userpw == "") {
+          //전역변수가 빈 값이면 result1함수 실행
+          username = data.name;
+          userpw = data.password;
+          result1();
+        } else {
+          //위 조건이 아니면 result2함수에 전역변수 넣어서 실행
+          result2(username, userpw);
+          console.log("result2실행", username, userpw);
+        }
+      }
+    </script>
+    ```
+    ```
+    "back- node.js"
+    app.post("/axiosPost", (req, res) => {
+    if (req.body.flag === 0) {
+    res.send("");
+    console.log("flag", req.body.flag);
+    console.log("실행1");
+    } else {
+    res.send(req.body);
+    console.log("실행2");
+    }
+    console.log("back", req.body);
+    });
+    ```
+    POST는 get과 달리 HTTP패킷의 바디에 정보를 보내기 때문에 back단에서도 데이터를 받고 보낼때 req.body로 객체형태로 보낸다. body를 추출하기 위해서는 body-parser 라는 미들웨어가 필요하다. (미들웨어는 양 쪽을 연결하여 데이터를 주고받을 수 있도록 중간에서 매개 역할을 하는 소프트웨어이다.) body-parser는 JSON, URL-encoded, 그리고 multipart 등 다양한 형식의 본문 데이터를 파싱하는 기능을 제공한다. `npm install body-parser` 이런식으로 설치할 수도 있으나, 수업때 express 애플리케이션을 사용하였기에 아래와 같이 body-parser를 사용하였다.
+
+    ```
+    // body-parser
+    app.use(express.urlencoded({ extended: true }));
+    app.use(express.json());
+    ```
+
+    ps. 뭔가 이런글을 쓴다고 한다면 양질의 컨텐츠를 생성하고 싶은 욕심이 생기지만 아직은 배움이 짧아 그런가 검색이나 여러 블로그를 통한 짜집기(?) 밖에 안되는 것 같다. 제대로 이해한 부분은 나의 표현으로 올리긴 하지만 그렇지 못한 부분은 어쩔수 없이 참고를 한다. 지식과 정보가 고도화 되어 정보생산자가 될수 있을때까지 열심히 써봐야겠다.
+
+
+    <hr/>
+    참고자료 <br/>
+    https://zakelstorm.tistory.com/62
+    https://developer.mozilla.org/ko/docs/Web/API/Fetch_API/Using_Fetch
+    https://www.daleseo.com/js-window-fetch/
+    https://noahlogs.tistory.com/35
+    https://velog.io/@tnstjd120/%EC%8A%A4%ED%94%84%EB%A0%88%EB%93%9C-%EC%97%B0%EC%82%B0%EC%9E%90spread-operator
+    https://12bme.tistory.com/289
+    <br/>+ 챗 GPT
