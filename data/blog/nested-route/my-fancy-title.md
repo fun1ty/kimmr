@@ -68,8 +68,4 @@ export default projectsData
 
 ```
 
-title: 파일전송 | node.js
-date: '2023-08-04'
-tags: ['[포스코x코딩온] 웹개발자 풀스택 과정', '5주차', 'node.js', 'javascript']
-draft: false
-summary: 파일전송 방법을 배우고 미들웨어인 multer를 배움.
+

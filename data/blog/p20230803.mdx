@@ -9,7 +9,7 @@ summary: form 전송방법 중 비동기 통신 방법을 배우고 node.js를 �
 <strong>동적Form?</strong>
 
     form 전송 시 `<input type ="submit">` 혹은 `<button type = "submit">` 이면 새로운 페이지로 이동된다. 이를 막기 위해 비동기 통신으로 서버와 데이터를 주고 받는다. 그러면 클라이언트 입장에서는 번거롭게 페이지 전환할 필요도 없고 페이지가 전환 되면서 새로 렌더링 하는 과정 또한 생략되어 효율적이다.<br/>
-    따라서 form을 만들때는 기본적으로 `<form action="/데이터를 보낼url" method="post">`로 만드나 동적 form으로 만든다면 `<form name="register">` 이렇게 form에 name을 설정하여 자바스크립트 `document.forms['register'];` 로 form을 선택할 수 있다. <br/>
+    따라서 form을 만들때는 기본적으로 `<form action="/데이터를 보낼url" method="post">`로 만드나 동적 form으로 만든다면 `<form name="form이름">` 이렇게 form에 name을 설정하여 자바스크립트 `document.forms['form이름'];` 로 form을 선택할 수 있다. <br/>
 
     <strong>비동기 통신?</strong> <br/>
 
@@ -26,7 +26,7 @@ summary: form 전송방법 중 비동기 통신 방법을 배우고 node.js를 �
     (번외로 회원가입 같은 기능은 get이 아닌 post로 구현하는게 맞다..) 아래는 체크박스 데이터를 가져오는 코드이다.
 
     ```
-    "front- html"
+    // front- html
     ...생략...
     <fieldset>
         <legend>관심사</legend>
@@ -39,7 +39,7 @@ summary: form 전송방법 중 비동기 통신 방법을 배우고 node.js를 �
       </fieldset>
     ```
     ```
-    "front- 자바스크립트"
+    // front- 자바스크립트
     <script>
       const form = document.forms["register"];
       const formId = document.getElementById("register");
@@ -77,11 +77,11 @@ summary: form 전송방법 중 비동기 통신 방법을 배우고 node.js를 �
     .join(", "),
     ```
 
-    여기서 ...form의 ...은 스프레드 연산자이다.
+    여기서 `...form`의 `...`은 스프레드 연산자이다.
     기존 배열이나 객체의 전체 또는 일부를 다른 배열이나 객체로 빠르게 복사 할 수 있다. 기존의 concat보다 간편하고 깔끔하게 병합이 된다고 한다. 다음 map함수를 이용하여 선택된 체크박스의 값을 추출하고 join함수를 통해 문자열로 결합한다. ","으로 구분한다.
     console.log로 찍어보면 아래와 같이 체크된 값이 나오는 것을 확인할 수 있다.
 
-<Image src="/static/images/hobby.png" width={300} height={180} />
+    <Image src="/static/images/hobby.png" width={300} height={180} />
 
     또 다른 예제로는 POST 회원가입이 있다.
     <Image src="/static/images/example1.gif" width={300} height={200} />
@@ -89,7 +89,7 @@ summary: form 전송방법 중 비동기 통신 방법을 배우고 node.js를 �
     마찬가지로 동적form으로 데이터를 주고받는다. 나같은 경우에는 post 회원가입을 만드는데 함수를 2개 만들어서 구현하였다.
 
     ```
-    "front- 자바스크립트"
+    // front- 자바스크립트
     <script>
       ...생략...
       let flag = 0;
@@ -151,7 +151,7 @@ summary: form 전송방법 중 비동기 통신 방법을 배우고 node.js를 �
     </script>
     ```
     ```
-    "back- node.js"
+    // back- node.js
     app.post("/axiosPost", (req, res) => {
     if (req.body.flag === 0) {
     res.send("");

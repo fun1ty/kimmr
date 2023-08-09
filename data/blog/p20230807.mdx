@@ -1,0 +1,517 @@
+---
+title: MVC패턴 | node.js
+date: '2023-08-07'
+tags: ['[포스코x코딩온] 웹개발자 풀스택 과정', '5주차', 'node.js', 'mysql']
+draft: false
+summary: 소프트웨어 디자인패턴 중 MVC 패턴을 배움.
+---
+
+지난주에 중요한 방법론 중 하나인 MVC디자인 패턴을 배웠다. <br />
+DB는 mysql을 사용하였고 백엔드는 node.js, 프론트는 ejs 를 사용하였다. (프론트를 ejs 썼다는 설명이 맞는지
+모르겠다..) 이 포스팅에서는 MVC패턴의 개념과 왜 MVC패턴을 사용하는지와 MVC패턴의 한계점 그리고 MVC패턴을
+이용한 구현 기능 및 코드를 첨부하여 설명하는 순서로 이어진다.{' '}
+
+<h3>
+  <strong>MVC?</strong>
+</h3>
+
+> MVC (모델-뷰-컨트롤러)
+> 는 사용자 인터페이스, 데이터 및 논리 제어를 구현하는데 널리 사용되는 소프트웨어 디자인 패턴
+
+아래는 mvc에 대한 구조도
+
+<Image alt="mvc" src="/static/images/mvc-pattern-2.jpeg" width={1000} height={400} />
+
+**| 모델(model): 함축된 데이터** <br/>
+어떠한 동작을 수행하는 코드를 말한다. 내부 비즈니스 로직을 처리하는 역할을 한다.{' '}
+
+- ex. DB와 상호작용(CRUD)
+
+**| 뷰(view): 데이터의 표현**<br/>
+
+사용자에게 보여지는 부분. 모델(보여주는 데이터)를 컨트롤러에서 받아와서 사용자에게 보여준다. 여러개의
+뷰가 존재할 수 있다. 뷰에는 복잡한 로직이 포함되어서는 안되며 뷰에는 html, xml등이 포함된다.{' '}
+
+- ex. 유저인터페이스(UI)
+
+**| 컨트롤러(controller): 모델과 뷰의 연결고리**<br/>
+모델과 뷰 사이를 이어주는 역할. 모델에 명령을 보냄으로써 모델의 상태를 변경할 수 있다. 모델이나 뷰로부터 변경 내용을 통지 받으면 이를 각 구성 요소에게 통지한다.
+
+세가지 요소를 종합하여 다음과 같은 최적화된 패턴을 구성하는 것이 가장 이상적이다.
+
+```
+똑똑한 모델, 최소한의 컨트롤러, 멍청한 뷰
+```
+
+그럼 mvc 패턴은 어떻게 동작하는 것일까?
+동작순서는 다음과 같다 <br />
+
+1. 사용자의 action은 컨트롤러에 들어온다.
+   <br />{' '}
+2. 컨트롤러는 사용자의 action을 확인하고 모델에서 데이터 CRUD를 한다. <br/>
+3. 모델은 이 결과를 컨트롤러에 전달하고 컨트롤러는 모델을 나타낼 뷰를 선택한다.<br/>
+4. 뷰는 모델을 이용하여 화면을 나타낸다.
+
+<br />
+<h3>
+  <strong>왜 MVC패턴을 사용하는지?</strong>
+</h3>
+- 여러개발자가 역할을 나눠서 모델, 컨트롤러, 뷰를 동시에 개발할 수 있다. <br />
+- 중복코드를 없앨 수 있고, 확장성있고 유연한 코딩이 가능하다 <br />
+
+- 각 컴포넌트별로 나눠져 있어 디버깅과 테스트가 용이하다.
+
+<h3>
+  <strong>MVC패턴의 한계점</strong>
+</h3>
+복잡한 대규모 프로그램의 경우 다수의 뷰와 모델이 컨트롤러를 통해 연결되기 때문에 컨트롤러가 불필요하게
+커지는 현상이 발생한다. 그리고 모델과 뷰 사이의 의존성이 높아 프로젝트 규모가 커질 수록 복잡해서 유지보수를
+어렵게 만들수 있다.
+<br />
+<h3>
+  <strong>MVC패턴으로 구현한 예제</strong>
+</h3>
+
+위 개념을 활용하여 만든 간단한 CRUD 기능 예제이다.
+
+<Image alt="mvc" src="/static/images/mvc_mysql.gif" width={400} height={300} />
+
+디렉토리 구조는 아래와 같다. <br/>
+간단하게 파일에 대한 정의를 주석으로 달았다.
+
+```
+C:.
+│ app.js  //root
+│ package-lock.json
+│ package.json
+├─controller //모델과 뷰를 이어주는 역할을 한다.
+│  Cvisitior.js
+│
+├─model //DB와 상호작용하는 부분이다.
+│  Visitior.js
+│
+├─routes //컨트롤러를 연결시켜줄 도메인을 분리하여 관리
+│  index.js
+│
+└─views //사용자 화면에 보여주는 페이지
+   404.ejs //에러가 났을때 화면에 보여주는 페이지
+   index.ejs  //첫페이지
+   visitor.ejs
+```
+
+우선, app.js 페이지에서 새로 배운 부분은 404에러처리 페이지와 라우터를 처리하는 부분이다. node.js는 인터프리터 언어이기 때문에(자바스크립트 자체가 인터프리터임) 위에서 아래로 읽는다. 때문에 404페이지를 처리하는 부분 역시 가장 아래에 있어야 모든 페이지를 처리 후 에러페이지를 처리할 수 있다. 라우터 모듈을 연결시키는 부분은 아래 코드로 경로에 '/'가 있으면 routes에 있는 모듈을 불러온다.
+
+//router 파일<br/>
+const indexRouter = require("./routes"); //index.js 생략
+app.use("/", indexRouter);
+
+아래는 app.js의 전체 코드이다.
+
+```
+const express = require("express");
+const app = express();
+const PORT = 8000;
+
+//body-parser
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+//router 파일
+const indexRouter = require("./routes"); //index.js 생략
+app.use("/", indexRouter);
+
+// view engine
+app.set("view engine", "ejs");
+app.set("views", "./views");
+//정적파일 설정 (외부에서 내부파일로 접근할때)
+app.use("/uploads", express.static(__dirname + "/views"));
+app.use("/uploads", express.static(__dirname + "/static"));
+
+//404
+app.get("*", (req, res) => {
+  res.render("404");
+});
+
+//server start
+app.listen(PORT, () => {
+  console.log(`http://localhost:${PORT}`);
+});
+
+```
+
+views 에서는 idnex.ejs에서는 별다른 로직이 없기 때문에 생략하고 visitor.ejs를 첨부한다. 나머지 로직이야 작성하기 나름이나, 컨트롤러에 데이터를 전송하는 부분은 이 부분이다.
+`axios({ method: "PUT", url: '/visitor/update', data: data, }).then((res) => {... })` <br/>
+
+- method = http메소드를 설정한다.<br/>
+- url = 라우터와 경로를 동일하게 맞춰준다.
+- data = 요청 data
+
+아래 상세코드를 덧붙인다.
+
+```
+<body>
+    <div name="register" id="register">
+      <fieldset>
+        <legend>방명록 등록</legend>
+        <input
+          type="text"
+          name="inputName"
+          id="inputName"
+          placeholder="사용자 이름"
+        />
+
+        <Br /><input
+          type="text"
+          name="inputComment"
+          id="inputComment"
+          placeholder="방명록"
+          onchange=""
+        />
+        <Br />
+        <button type="button" id="submit" onclick="insertAxios()">등록</button>
+      </fieldset>
+
+      <table border="1" cellspacing="0">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>작성자</th>
+            <th>방명록</th>
+            <th>수정</th>
+            <th>삭제</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% for (let i = 0; i < data.length; i++) { %>
+          <tr id="<%= data[i].id %>" class="tr">
+            <td><%= data[i].id %></td>
+            <td><%= data[i].name %></td>
+            <td><%= data[i].comment %></td>
+            <td>
+              <button type="button" onclick="insertInput()">수정</button>
+            </td>
+            <td>
+              <button type="button" onclick="deleteAxios()">삭제</button>
+            </td>
+          </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+    <script>
+      let idvalue = "";
+      const Inputname = document.getElementById("inputName");
+      const Inputcomment = document.getElementById("inputComment");
+      const name = document.getElementById("inputName").value;
+      const comment = document.getElementById("inputComment").value;
+      let nameChk = "";
+      let commentChk = "";
+      const submitBtn = document.getElementById("submit");
+
+      //방문자 목록 등록
+      function insertAxios() {
+        const name = document.getElementById("inputName").value;
+        const comment = document.getElementById("inputComment").value;
+        console.log("insertbtn실행");
+        console.log("name: ", name, "comment: ", comment);
+        if (
+          name === "" ||
+          comment === "" ||
+          name === undefined ||
+          comment === undefined
+        ) {
+          alert("내용을 입력하세요");
+        } else if (idvalue != "") {
+          updateAxios();
+        } else {
+          const data = {
+            name: name,
+            comment: comment,
+          };
+          axios({
+            method: "POST",
+            url: "/visitor/insert", //URL이면 안됨
+            data: data,
+          }).then((res) => {
+            console.log("삽입완료");
+            location.reload();
+          });
+        }
+      }
+      //방문자 목록 삭제
+      function deleteAxios() {
+        const trElement = event.target.closest("tr");
+        const id = parseInt(trElement.id);
+        console.log("deletetbtn실행");
+        console.log("id: ", id);
+
+        const data = {
+          id: id,
+        };
+        axios({
+          method: "DELETE",
+          url: `/visitor/delete/${id}`,
+          data: data,
+        }).then((res) => {
+          console.log("삭제완료");
+          location.reload();
+        });
+      }
+      //방문자 목록 수정 - input에 값 삽입
+      function insertInput() {
+        console.log("insertbtn실행");
+        const trElement = event.target.closest("tr");
+        const id = parseInt(trElement.id);
+        idvalue = id;
+        const name = trElement.querySelector("td:nth-child(2)").innerText;
+        const comment = trElement.querySelector("td:nth-child(3)").innerText;
+
+        console.log("idvalue", idvalue);
+        console.log("name: ", name, "comment: ", comment);
+
+        document.getElementById("inputName").value = `${name}`;
+        document.getElementById("inputComment").value = `${comment}`;
+      }
+
+      //수정부분-input값 수정 후 엔터 쳤을때
+      Inputname.addEventListener("keyup", function (event) {
+        if (event.keyCode === 13) {
+          nameChk = this.value;
+          updateData();
+        }
+      });
+      Inputcomment.addEventListener("keyup", function (event) {
+        if (event.keyCode === 13) {
+          commentChk = this.value;
+          updateData();
+        }
+      });
+
+      function updateData() {
+        // idvalue가 비어있지 않고, name 또는 comment가 변경된 경우에만 업데이트 함수 호출
+        if (idvalue !== "" && (nameChk !== "" || commentChk !== "")) {
+          updateAxios(nameChk, commentChk);
+        }
+      }
+
+      //방문자 등록 수정
+      function updateAxios(name, comment) {
+        console.log("updateAxios 실행");
+        console.log("update-idvalue:", idvalue);
+        const data = {
+          id: idvalue,
+          name: name,
+          comment: comment,
+        };
+        axios({
+          method: "PUT",
+          url: `/visitor/update`,
+          data: data,
+        }).then((res) => {
+          console.log("삽입완료");
+          location.reload();
+        });
+      }
+    </script>
+  </body>
+```
+
+다음 routes/index.js 이다.
+HTTP메소드를 설정하고 경로에 따른 컨트롤러 함수를 설정해준다.
+get은 조회, post는 등록, 수정에는 put과 patch가 있는데 차이점은 put은 전체를 수정할 수 있고 patch는 일부만 수정가능하다. delete는 리소스를 삭제할 때 쓰며, 요청시에 Body 값과 Content-Type 값이 비워져있다. 때문에 `/:파라미터` 형식으로 파라미터값을 전송한다.
+
+```
+const express = require("express");
+const controller = require("../controller/Cvisitior");
+const router = express.Router();
+
+router.get("/", controller.main); //Get
+router.get("/visitor", controller.getVisitors);
+router.post("/visitor/insert", controller.insertVisitors);
+router.put("/visitor/update", controller.updateVisitors);
+router.delete("/visitor/delete/:id", controller.deleteVisitors);
+
+module.exports = router;
+```
+
+그 다음 model/Visitior.js 이다.
+conn.query로 sql구문을 db에서 실행하고 난 뒤 cb(=callback함수)로 결과값을 반환한 뒤 controller로 넘겨준다.
+참고로 mysql을 연결 시 루트계정에 접근할 수 없다. 따라서 사용자 계정을 새로 생성한 뒤 db 연결을 시켜줘야 한다. 참고로
+`CREATE USER 'user'@'%' IDENTIFIED BY '1234';`에서 'user'@'%'는 "Limit to Hosts Matching"을 %로 바꿔주는 표현으로 모든 IP에서 접속이 가능하도록 설정할 수 있다.<br/>
+다음은 mysql 워크밴치에서 사용자 설정 부분이다.
+
+```
+-- 생성된 계정 정보 확인
+SELECT * FROM mysql.user;
+-- 사용자 추가
+CREATE USER 'user'@'%' IDENTIFIED BY '1234';
+-- user 계정 권한 부여
+GRANT ALL PRIVILEGES ON *.* TO 'user'@'%' WITH GRANT OPTION;
+-- 현재 사용중인 mysql 캐시 지우고 새로 적용
+FLUSH PRIVILEGES;
+
+-- 위에 실행 후 권한 오류 나는 경우
+-- mysql 패스워드 플러그인 "caching_sha2_password"을 소화하지 못해서 생기는 오류 해결법
+select host, user, plugin, authentication_string from mysql.user; -- 현재 플러그인 타입 확인
+ALTER USER 'user'@'%' IDENTIFIED WITH mysql_native_password BY '1234';
+```
+
+model/Visitior.js 상세코드이다. <br/>
+콜백함수로 결과값을 반환하여 컨트롤러에 전달한다.
+
+```
+exports.getVisitors = (cb) => {
+  conn.query(sql, (err, rows) => {
+    if (err) throw err;
+    cb(rows);
+  });
+};
+
+//방문자 목록 등록
+exports.insertVisitors = (name, comment, cb) => {
+  const sql1 = `insert into visitor (name, comment) values ('${name}', '${comment}');`;
+
+  console.log("insert sql실행");
+  function insert1() {
+    conn.query(sql1, (err, rows) => {
+      if (err) throw err;
+      cb(rows);
+    });
+  }
+
+  insert1();
+};
+
+//방문자 목록 수정
+exports.updateVisitors = (updateId, name, comment, cb) => {
+  const nameUpdate = `update kdt8.visitor set name = '${name}' where id =${updateId};`;
+  const commentUpdate = `update kdt8.visitor set comment = '${comment}' where id =${updateId};`;
+
+  function nameChange() {
+    return new Promise((resolve, reject) => {
+      conn.query(nameUpdate, (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+      });
+    });
+  }
+
+  function commentChagne() {
+    return new Promise((resolve, reject) => {
+      conn.query(commentUpdate, (err, rows) => {
+        if (err) reject(err); //에러처리
+        else resolve(rows);
+      });
+    });
+  }
+
+  async function updateData() {
+    let result;
+    try {
+      if (name != "") {
+        result = await nameChange();
+      } else if (comment != "") {
+        result = await commentChagne();
+      }
+      cb(result);
+    } catch (error) {
+      console.error("Error:", error);
+      cb([]);
+    }
+  }
+  updateData();
+};
+
+//방문자 목록 삭제
+exports.deleteVisitors = (deleteId, cb) => {
+  const sql1 = `delete from kdt8.visitor where id = ${deleteId};`;
+
+  console.log(deleteId);
+
+  function delete1() {
+    conn.query(sql1, (err, rows) => {
+      if (err) throw err;
+      console.log("삭제 실행1");
+      cb(rows);
+    });
+  }
+
+  delete1();
+};
+
+//mysql DB연결
+const mysql = require("mysql");
+const conn = mysql.createConnection({
+  host: "localhost",
+  user: "user",
+  password: "1234",
+  database: "kdt8",
+});
+
+```
+
+controller/Cvisitior.js 이다. <br/>
+최소한의 로직으로 컨트롤러를 작성했다. 모델에서 받은 데이터를 view에 전달한다.
+
+```
+const Visitor = require("../model/Visitior");
+
+exports.main = (req, res) => {
+  res.render("index");
+};
+
+//방문록에 방문자 목록 출력
+exports.getVisitors = (req, res) => {
+  Visitor.getVisitors((result) => {
+    res.render("visitor", { data: result });
+  });
+};
+
+//방문자 목록 삽입
+exports.insertVisitors = (req, res) => {
+  const name = req.body.name;
+  const comment = req.body.comment;
+
+  console.log("insert 실행");
+  Visitor.insertVisitors(name, comment, (result) => {
+    res.render("visitor", { data: result });
+  });
+};
+
+//방문자 목록 수정
+exports.updateVisitors = (req, res) => {
+  const name = req.body.name;
+  const comment = req.body.comment;
+  const updateId = parseInt(req.body.id);
+  console.log("update controller실행");
+  Visitor.updateVisitors(updateId, name, comment, (result) => {
+    res.render("visitor", { data: result });
+  });
+};
+
+//방문자 목록 삭제
+exports.deleteVisitors = (req, res) => {
+  const deleteId = req.body.id;
+  console.log("delete 실행 id :", deleteId);
+
+  Visitor.deleteVisitors(deleteId, (result) => {
+    console.log("deleteVisitors: ", result);
+    res.render("visitor", { data: result });
+  });
+};
+```
+
+분명 더 효율성이 높게 코드를 작성하는 방법이 있을것이나, node.js로 mvc 패턴의 대략적인 흐름을 설명하기 위해 첨부하였다.
+지금은 라우터에 index.js밖에 없으나 페이지가 더 많이 늘어난다면 라우터의 페이지를 여러개 늘려 관리할 수 있고 협업 할때는 각각 기능들을 담당하여 개발할 수 있다는 점이 큰 장점이 될거같다. 흐름만 파악하면 효율적인 개발패턴 임에는 틀림없다. <br/>
+번외로 내가 작성한 코드의 단점 중 하나는 정보 수정할때 엔터키를 눌러야만 수정이 가능하다는 점이다.
+(다시 등록버튼을 클릭하면 db에 undefined로 삽입됨) 이 부분에 대한 처리는 여전히 고민중이다.
+
+<hr />
+출처
+<br /> https://junhyunny.github.io/information/design-pattern/mvc-pattern/
+<br /> https://developer.mozilla.org/ko/docs/Glossary/MVC https://ko.wikipedia.org/wiki/%EB%AA%A8%EB%8D%B8-%EB%B7%B0-%EC%BB%A8%ED%8A%B8%EB%A1%A4%EB%9F%AC <br />
+https://medium.com/@jang.wangsu/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4-mvc-%ED%8C%A8%ED%84%B4%EC%9D%B4%EB%9E%80-1d74fac6e256
+https://devscb.tistory.com/118 <br />
+https://hwanine.github.io/others/MVC/ <br />
+https://beomy.tistory.com/43 <br />
+https://velog.io/@yh20studio/CS-Http-Method-%EB%9E%80-GET-POST-PUT-DELETE
