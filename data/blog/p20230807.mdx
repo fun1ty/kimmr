@@ -139,7 +139,7 @@ app.listen(PORT, () => {
 
 ```
 
-views 에서는 idnex.ejs에서는 별다른 로직이 없기 때문에 생략하고 visitor.ejs를 첨부한다. 나머지 로직이야 작성하기 나름이나, 컨트롤러에 데이터를 전송하는 부분은 이 부분이다.
+views 에서는 idnex.ejs에서는 별다른 로직이 없기 때문에 생략하고 visitor.ejs를 첨부한다. 컨트롤러에 데이터를 전송하는 부분은 이 부분이다.
 `axios({ method: "PUT", url: '/visitor/update', data: data, }).then((res) => {... })` <br/>
 
 - method = http메소드를 설정한다.<br/>
