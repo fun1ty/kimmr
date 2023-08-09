@@ -273,7 +273,7 @@ views 에서는 idnex.ejs에서는 별다른 로직이 없기 때문에 생략�
         document.getElementById("inputComment").value = `${comment}`;
       }
 
-      //수정부분-input값 수정 후 엔터 쳤을때
+      //수정부분-input값 수정 후 엔터 쳤을때 데이터 수정
       Inputname.addEventListener("keyup", function (event) {
         if (event.keyCode === 13) {
           nameChk = this.value;
@@ -451,7 +451,7 @@ const conn = mysql.createConnection({
 ```
 
 controller/Cvisitior.js 이다. <br/>
-최소한의 로직으로 컨트롤러를 작성했다. 모델에서 받은 데이터를 view에 전달한다.
+최소한의 로직으로 컨트롤러를 작성했다. 뷰에서 받은 데이터를 모델에 전달하고 모델에서 처리후 결과값으로 받은 데이터를 view에 전달한다.
 
 ```
 const Visitor = require("../model/Visitior");
