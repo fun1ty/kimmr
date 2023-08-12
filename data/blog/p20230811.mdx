@@ -265,8 +265,8 @@ exports.getProfile = (req, res) => {
 
  //프로필수정
 exports.UpdateUserInfo = (req, res) => {
-  const { name, pw, id } = req.body;
   //구조분해 할당
+  const { name, pw, id } = req.body;
 
   models.User.update({ name, pw }, { where: { id } }).then((result) => {
     console.log(result);
