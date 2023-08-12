@@ -152,7 +152,7 @@ module.exports = db;
 <Image alt="sequelize" src="/static/images/p20230811_mysql.jpg" width={500} height={120} />
 
 모델에서 정의하는 모든열에는 데이터 유형이 있어야 한다.
-내장 데이터 유형에 액세스하려면 `const { DataTypes } = require("sequelize");`로 가져와야한다. sequelize에서는 다양한 데이터 유형들이 있다. (자세한 데이터 유형은 https://sequelize.org/docs/v6/core-concepts/model-basics/ 참고)
+내장 데이터 유형에 액세스하려면 `const { DataTypes } = require("sequelize");`로 가져와야한다. sequelize에서는 다양한 데이터 유형들이 있다. (자세한 데이터 유형은 [시퀄라이즈 공식문서](https://sequelize.org/docs/v6/core-concepts/model-basics/) 참고)
 
 type을 지정했다면, Column Options를 정의해야한다.
 allowNull 이나 defaultValue, unique, primaryKey 등으로 지정할 수 있다.
