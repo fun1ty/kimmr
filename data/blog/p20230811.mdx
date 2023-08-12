@@ -155,8 +155,7 @@ module.exports = db;
 내장 데이터 유형에 액세스하려면 `const { DataTypes } = require("sequelize");`로 가져와야한다. sequelize에서는 다양한 데이터 유형들이 있다. (자세한 데이터 유형은 [시퀄라이즈 공식문서](https://sequelize.org/docs/v6/core-concepts/model-basics/) 참고)
 
 type을 지정했다면, Column Options를 정의해야한다.
-allowNull 이나 defaultValue, unique, primaryKey 등으로 지정할 수 있다.
-models의 User.js의 상세코드이다.
+allowNull 이나 defaultValue, unique, primaryKey 등으로 지정할 수 있다. 이를 이용한 models의 User.js의 상세코드이다.
 
 ```
 const { DataTypes } = require("sequelize");
@@ -215,7 +214,7 @@ module.exports = User; //index에서 사용할수 있게 모듈로 export
 
 공통적으로 where옵션은 쿼리를 필터링하는데 사용된다.
 
-controller의 Cuser.js이다.
+다음은 controller의 Cuser.js이다.
 
 ```
 const models = require("../models");
@@ -313,7 +312,7 @@ exports.findall = (req, res) => {
 };
 ```
 
-시퀄라이즈로 모델의 관계형성과 조인을 할수있으며 네가지 유형이 있다. 이를 통해 복잡한 테이블구조를 단순화하여 관리할 수 있다.
+시퀄라이즈로 모델의 관계형성을 할수있으며 네가지 유형이 있다. 이를 통해 복잡한 테이블구조를 단순화하여 관리할 수 있다.
 
 - `HasOne` = 1:1관계
 - `BelongsTo` = 1:1관계
@@ -325,7 +324,7 @@ exports.findall = (req, res) => {
 - `BelongsToMany` = n:m 관계 <br/>
   => 무척 복잡하기 때문에 잘 사용하지 않는다. 시퀄라이즈 자체를 사용하지 않는다기보다는 RDBMS상 다대다 관계를 잘 사용하지 않는다고 한다.
 
-이 실습예제에서는 없지만 다른 실습예제(수강신청 웹페이지였다.)에서 사용한 관계 연결을 정의하는 것을 첨부한다. 뷰페이지를 만들지 않았기 때문에 참고할 수 있는 영상은 없다.
+이 실습예제에서는 없지만 다른 실습예제(주제는 수강신청 웹페이지였다.)에서 사용한 관계 연결을 정의하는 것을 첨부한다. 뷰페이지를 만들지 않았기 때문에 참고할 수 있는 영상은 없다.
 
 이 프로젝트의 구조도이다.
 
@@ -449,7 +448,7 @@ exports.get_student = async (req, res) => {
 사실 처음 보았을때는 환경변수 설정이나 sequelize 문법등이 생소하여 진입장벽이 높게 느껴졌으나 막상 사용해보니
 model에서 콜백함수로 결과값을 반환해주기 위해 RDBMS 구문으로 한번 더 작성하는 대신 model에서는 DB만 정의하고
 controller에서 한번에 처리하니 훨씬 더 효율적인 방법이라고 느꼈고 한층 더 객체지향프로그래밍에 가까워졌다는
-생각이 들었다. 틈틈히 시퀄라이즈 공식문서를 읽으며 배경지식을 쌓도록 노력하자.
+생각이 들었다. 틈틈히 시퀄라이즈 공식문서를 읽으며 배경지식을 쌓도록 노력해야겠다.
 <br />
 <strong>상세코드</strong> <br />
 👉 https://github.com/fun1ty/KDT_8_web/tree/main/sequelize_DB <br />
