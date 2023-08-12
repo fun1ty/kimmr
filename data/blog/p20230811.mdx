@@ -392,7 +392,7 @@ foreign keys탭으로 들어가면 더 자세하게 확인할 수 있다.
 />
 
 controller의 Cstudent.js 이다. <br/>
-`{ include: StudentProfile }`를 통해 중첩연결(sql의 조인문과 비슷)으로 원하는 컬럼을 조회하여 데이터를 삽입 할 수 있다. include는 중첩으로도 사용할 수 있다.
+`{ include: StudentProfile }`를 통해 중첩연결(sql의 조인문과 비슷)으로 원하는 컬럼을 조회하여 데이터를 삽입하거나 조회할 수 있다. include는 다중으로 사용이 가능하다.
 
 ```
 const { Student, StudentProfile, Classes } = require("../models");
