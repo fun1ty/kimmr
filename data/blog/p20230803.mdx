@@ -70,7 +70,16 @@ summary: form 전송방법 중 비동기 통신 방법을 배우고 node.js를 �
           hobby.push(elem.value);
         });
         console.log("hobby", hobby);
-      }  .. 이하 생략..
+      }
+      const data = {  //전송하기 위해 데이터에 담기
+          name: form.name.value,
+          gender: form.gender.value,
+          year: form.year.value,
+          month: form.month.value,
+          day: form.day.value,
+          hobby,
+        };
+        ...이하생략...
     ```
     ```
     "back- node.js"

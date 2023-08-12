@@ -359,8 +359,7 @@ module.exports = router;
 
 그 다음 model/Visitior.js 이다.
 conn.query로 sql구문을 db에서 실행하고 난 뒤 cb(=callback함수)로 결과값을 반환한 뒤 controller로 넘겨준다.
-mysql을 연결 시 루트계정에 접근할 수 없다. 따라서 사용자 계정을 새로 생성한 뒤 db 연결을 시켜줘야 한다. 참고로
-`CREATE USER 'user'@'%' IDENTIFIED BY '1234';`에서 'user'@'%'는 "Limit to Hosts Matching"을 %로 바꿔주는 표현으로 모든 IP에서 접속이 가능하도록 설정할 수 있다.<br/>
+mysql은 연결 시 루트계정에 접근할 수 없다. 따라서 사용자 계정을 새로 생성한 뒤 db 연결을 시켜줘야 한다. 참고로 `CREATE USER 'user'@'%' IDENTIFIED BY '1234';`에서 'user'@'%'는 "Limit to Hosts Matching"을 %로 바꿔주는 표현으로 모든 IP에서 접속이 가능하도록 설정할 수 있다.(즉, % 문자는 모든 IP 또는 호스트명을 의미한다. mysql은 사용자의 계정뿐아니라 사용자의 접속지점(클라이언트가 실행된 호스트명이나 도메인 또는 IP주소)도 계정의 일부가 된다.)<br/>
 다음은 mysql 워크밴치에서 사용자 설정 부분이다.
 
 ```
@@ -542,4 +541,5 @@ https://medium.com/@jang.wangsu/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4-mv
 https://devscb.tistory.com/118 <br />
 https://hwanine.github.io/others/MVC/ <br />
 https://beomy.tistory.com/43 <br />
-https://velog.io/@yh20studio/CS-Http-Method-%EB%9E%80-GET-POST-PUT-DELETE
+https://velog.io/@yh20studio/CS-Http-Method-%EB%9E%80-GET-POST-PUT-DELETE <br />
+도서 : Real MySQL 8.0, 백은빈,이성욱 지음
