@@ -47,6 +47,7 @@ const Giscus = () => {
 
     const comments = document.getElementById(COMMENTS_ID)
     if (comments) comments.appendChild(script)
+    setEnabledLoadComments(true)
 
     return () => {
       const comments = document.getElementById(COMMENTS_ID)
@@ -56,14 +57,15 @@ const Giscus = () => {
 
   // Reload on theme change
   useEffect(() => {
-    const iframe = document.querySelector('iframe.giscus-frame')
-    if (!iframe) return
+    // const iframe = document.querySelector('iframe.giscus-frame')
+    // if (!iframe) return
     LoadComments()
-  }, [LoadComments])
+  }, [])
+  // }, [LoadComments])
 
   return (
     <div className="pt-6 pb-6 text-center text-gray-700 dark:text-gray-300">
-      {enableLoadComments && <button onClick={LoadComments}>Load Comments</button>}
+      {/* {enableLoadComments && <button onClick={LoadComments}>Load Comments</button>} */}
       <div className="giscus" id={COMMENTS_ID} />
     </div>
   )
