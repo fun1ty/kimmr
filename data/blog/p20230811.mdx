@@ -7,7 +7,6 @@ summary: sequelize를 이용한 ORM
 images: ['/static/images/profile.png']
 ---
 
-<TOCInline toc={props.toc} exclude="Overview" asDisclosure />
 <h3>Intro</h3>
 
 기존 포스팅([MVC패턴 | node.js](https://kimmr-fun1ty.vercel.app/blog/p20230807)) 을 보면, mysql에서 테이블을
@@ -16,14 +15,12 @@ sql구문으로 만들어준 뒤, controller에서 sql을 직접 작성하여 DB
 포스팅은 ORM이란 무엇인지와 sequelize에 대해서 설명하고 이 개념을 이용해 만든 CRUD 기능이 있는 회원가입,
 로그인, 프로필페이지가 있는 간단한 예제의 구현코드를 설명한다.
 
-<TOCInline toc={props.toc} exclude="Overview" asDisclosure />
 <h3>ORM?</h3>
 
 > Object Relational Mapping, 객체-관계 매핑
 
 한마디로 관계형 데이터베이스와 객체 지향 프로그래밍 언어 간의 호환되지 않는 데이터를 자동으로 매핑(연결)해주는 프로그래밍 기법이다. 좀 더 적나라하게(?) 말하자면 node.js의 controller에서 sql구문을 이용해 RDBMS의 데이터를 연결해주던 것을 Sequelize 라이브러리를 통해 쉽게 연결할수 있다는 것이다. 데이터 매핑구조를 객체지향형으로 통일시키기 때문에 한층 더 oop적 구조에 가까워진다. <br/>
 
-<TOCInline toc={props.toc} exclude="Overview" asDisclosure />
 <h3>Sequelize를 이용한 ORM 프로그래밍</h3>
 
 프로젝트 시작순서는 기존포스팅과 동일하나, Sequelize 라이브러리와 sequelize-cli를 설치하는 것이 추가된다.
@@ -444,7 +441,6 @@ exports.get_student = async (req, res) => {
 ...생략....
 ```
 
-<TOCInline toc={props.toc} exclude="Overview" asDisclosure />
 <h3>As a result...</h3>
 
 사실 처음 보았을때는 환경변수 설정이나 sequelize 문법등이 생소하여 진입장벽이 높게 느껴졌으나 막상
@@ -454,7 +450,7 @@ model에서는 DB만 정의하고 controller에서 한번에 처리하니 훨씬
 쌓도록 노력해야겠다.
 
 <br />
-<TOCInline toc={props.toc} exclude="Overview" asDisclosure />
+
 <h3>상세코드</h3> <br />
 👉 https://github.com/fun1ty/KDT_8_web/tree/main/sequelize_DB <br />
 👉 https://github.com/fun1ty/KDT_8_web/tree/main/mvc_sequelize2
