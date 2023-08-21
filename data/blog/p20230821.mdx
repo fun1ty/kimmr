@@ -1,0 +1,27 @@
+---
+title: 사용자 인증 방법 및 암호화 | node.js
+date: '2023-08-18'
+tags:
+  [
+    '[포스코x코딩온] 웹개발자 풀스택 과정',
+    '7주차',
+    'cookie',
+    'seession',
+    'node.js',
+    'mysql',
+    'JWT',
+    'Sequelize',
+  ]
+draft: false
+summary: cookie와 session, jwt를 이용한 사용자인증 및 비밀번호 암호화를 배움.
+images: ['/static/images/profile.png']
+---
+
+<h3>Intro</h3>
+해외spa 패션사이트를 들어가면 맞춤형 광고를 위한 사용자 쿠키저장을 허용할 것인가라는 팝업창이 뜨면서
+필수적 쿠키와 광고를 위한 쿠키 저장 등이 뜬다. 몇년전에는 안떴던거 같은데..정책이 바뀐것인지 아니면 내가
+몰랐던 것인지는 모르겠지만 아무리 체크를 해도 몇일이 지나면 다시 떠서 여간 번거러운게 아니였는데 이번에
+왜그런지 알게되었다. 이 포스팅에서는 cookie와 session, 그리고 jwt 인증방식을 소개하고 비밀번호 암호화하는
+순으로 이어진다.
+
+<h3>Cookie</h3>
