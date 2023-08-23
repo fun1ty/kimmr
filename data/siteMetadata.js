@@ -45,15 +45,7 @@ const siteMetadata = {
       repositoryId: process.env.NEXT_PUBLIC_GISCUS_REPOSITORY_ID,
       category: process.env.NEXT_PUBLIC_GISCUS_CATEGORY,
       categoryId: process.env.NEXT_PUBLIC_GISCUS_CATEGORY_ID,
-      // repo: 'fun1ty/kimmr',
-      // repositoryId: 'R_kgDOKAz8rg',
-      // category: 'comment',
-      // categoryId: 'DIC_kwDOKAz8rs4CYPt3',
       mapping: 'pathname', // supported options: pathname, url, title
-      //NEXT_PUBLIC_GISCUS_REPO=fun1ty/kimmr
-      // NEXT_PUBLIC_GISCUS_REPOSITORY_ID=R_kgDOKAz8rg
-      // NEXT_PUBLIC_GISCUS_CATEGORY=comment
-      // NEXT_PUBLIC_GISCUS_CATEGORY_ID=DIC_kwDOKAz8rs4CYPt3
       reactions: '1', // Emoji reactions: 1 = enable / 0 = disable
       // Send discussion metadata periodically to the parent window: 1 = enable / 0 = disable
       metadata: '0',
