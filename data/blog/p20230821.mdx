@@ -462,10 +462,9 @@ postman으로 jwt를 확인해볼 수 있다. 암호가 맞으면 success에 tru
 절대 복호화가 불가능한 알고리즘이다. 양방향 알고리즘에는 대칭키(비공개키)방식과
 비대칭키(공개키)방식으로 나누어지며, 단방향은 해시방식이 대표적이다.
 
-node.js에서는 crypto, bcrypt 라는 내장모듈이 있다.
-crypto는 단방향, 양방향 암호화 처리가 가능하고 bcrypt는 단방향 암호화 모듈이지만 가장 많이 사용하고 보안이 더 뛰어나며 사용문법도 쉽다.
+<Image alt="jwt" src="/static/images/단방향양방향.jpeg" width={600} height={500} />
 
-이러한 비밀번호 암호화 방법에는 4가지 유형이 있다.
+세부적으로 비밀번호 암호화 방법에는 4가지 유형이 있다.
 
 1. 대칭키 : 어떤 정보를 암호화, 복호화 할때 사용하는 키가 동일(대칭)한 경우이다. 따라서 암호화 된 정보를 전달하고 확인하기 위해서는 송,수신자 둘다 똑같은 키를 가지고 있어야한다. (비밀키가 하나이다.)
 
@@ -474,6 +473,9 @@ crypto는 단방향, 양방향 암호화 처리가 가능하고 bcrypt는 단방
 3. 해싱 : 해시함수에 문자열 입력값을 넣어서 특정한 값으로 추출하는 것을 의미한다.
 
 4. 솔트 : 해시함수를 돌리기 전에 원문에 임의의 문자열을 덧붙이는 것을 말한다. 같은 비밀번호를 사용하더라도 salting된 문자열은 서로 다르기 때문에 각 사용자의 비밀번호는 서로 다른값으로 저장된다.
+
+node.js에서는 crypto, bcrypt 라는 내장모듈이 있다.
+crypto는 단방향, 양방향 암호화 처리가 가능하고 bcrypt는 단방향 암호화 모듈이지만 가장 많이 사용하고 보안이 더 뛰어나며 사용문법도 쉽다.
 
 아래 node.js 코드를 첨부한다.
 
@@ -544,6 +546,8 @@ const comparePassword = (password, dbPassword) => {
   return bcrypt.compareSync(password, dbPassword);
 };
 ```
+
+<br />
 
 <h3>JWT와 비밀번호 암호화를 이용한 실습예제</h3>
 
@@ -721,4 +725,4 @@ exports.Tokenverify = (req, res) => {
   https://www.crocus.co.kr/1236 <br />
   https://velog.io/@bbaekddo/cs-3 <br />
   https://javaplant.tistory.com/26 <br />
-  https://velog.io/@neity16/NodeJS-JWT-Token-%EC%82%AC%EC%9A%A9%ED%95%98%EA%B8%B0
+  https://velog.io/@neity16/NodeJS-JWT-Token-%EC%82%AC%EC%9A%A9%ED%95%98%EA%B8%B0 <br/>
