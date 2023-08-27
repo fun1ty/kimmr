@@ -1,0 +1,239 @@
+---
+title: 그룹함수를 알아보자 | sql
+date: '2023-08-27'
+tags: ['sqld', 'sql', '데이터베이스', '그룹함수']
+draft: false
+summary: 그룹함수를 이용해 데이터분석 시 소계/합계를 손쉽게 취합할 수 있다.
+images: ['/static/images/profile.png']
+---
+
+❗포스팅 된 쿼리를 확인해보고 싶은데 sqldeveloper나 다른 sql개발환경이 없다면?<br/>
+👉 https://livesql.oracle.com/apex/f?p=590:1000:34265832573802:::::
+
+<h3>Intro</h3>
+sqld를 공부하다가 그룹함수에 대해 자세히 알고자 쓰는 포스팅이다. 반드시 출제되는 영역이니 이 참에 확실히
+알아서 막힘없이 문제를 풀고자 하는게 목표이다.
+
+<h3>그룹함수란?</h3>
+기존에는 데이터분석 후 소계나 합계 등을 나타내기 위해서는 SQL이 포함된 3GL으로 배치 프로그램을 작성하거나(
+자료를 찾아봤는데 구체적으로 나온 자료가 없다..) union이나 union All로 묶어서 하나의 테이블을 여러번
+읽어 재정렬하는 복잡한 단계를 거쳐야 했다. 그러나 그룹함수를 이용한다면 하나의 sql로 쉽고 빠르게 Subtotal(소계)과
+Cross-tab(좌/우, 위/아래 형태의 합계를 내는 형태의 보고서) 와 같은 리포트를 작성할 수 있다.{' '}
+
+union all절을 사용한 이 구문을
+
+```
+select department_id|| '', avg(salary)
+from hr.employees
+group by department_id
+union all
+select job_id, avg(salary)
+from hr.employees
+group by job_id;
+```
+
+grouping sets를 사용해서 동일한 결과를 출력할 수 있다. <br/>
+
+```
+select department_id, job_id, avg(salary)
+from hr.employees
+group by grouping sets(department_id, job_id)
+order by department_id, job_id;
+```
+
+<br />
+<h3>그룹함수의 종류</h3>
+그룹함수에는 ROLLUP, CUBE, GROUPING SETS가 대표적이다.
+
+<h4>ROLLUP</h4>
+ROLLUP은 첫번째 그룹된 데이터에 대해서 집계를 한다. GROUP BY의 확장된 형태로 사용하기가 쉬우며 병렬로
+수행이 가능하기 때문에 시간 및 지역처럼 계층적 분류를 포함하고 있는 데이터의 집계에 적합하도록 되어 있다.
+계층적 구조이므로 인수의 순서가 바뀌면 수행결과도 바뀌게 되므로 인수의 순서에도 주의가 필요하다.
+<Image alt="rollup" src="/static/images/ROllUP.jpg" width={800} height={180} />
+
+다음은 부서별 평균월급과 인원수를 계산한 sql 구문이다.
+
+```
+select department_id, job_id, round(avg(salary),2), count(*)
+from hr.employees
+group by rollup(department_id, job_id)
+order by department_id, job_id;
+```
+
+아래는 실행된 결과이다. <br/>
+ROLLUP은 첫번째 인자(department_id)에 대해서면 소계를 생성해주기 때문에 department_id 그룹을 기준으로 소계 및 합계가 생긴것을 확인할 수 있다.
+
+<Image alt="rollup" src="/static/images/ROllUP실행.jpg" width={500} height={600} />
+<br />
+<br />
+<h4>CUBE</h4>
+CUBE는 ROLLUP과 달리 모든 그룹된 데이터에 대해서 집계를 생성한다. CUBE를 사용할 경우에는
+내부적으로는 Grouping Columns의 순서를 바꾸어서 또 한 번의 Query를 추가 수행해야 한다. 뿐만 아니라
+Grand Total(총계)은 양쪽의 Query에서 모두 생성이 되므로 한 번의 Query에서는 제거되어야만 하므로
+ROLLUP에 비해 시스템의 연산 대상이 많다. 시스템에 많은 부담을 주므로 주의해서 사용해야하며, 계층
+구조인 ROLLUP과는 달리 평등한 관계이므로 인수의 순서가 바뀌는 경우 행간에 정렬 순서는 바뀔 수 있어도
+데이터 결과는 같다.
+<Image alt="rollup" src="/static/images/CUBE.jpg" width={800} height={200} />
+
+다음은 부서별 평균월급과 인원수를 계산한 sql 구문이다. (위 sql에서 ROLLUP -> CUBE로만 변경되었다. )
+
+```
+select department_id, job_id, round(avg(salary),2), count(*)
+from hr.employees
+group by cube(department_id, job_id)
+order by department_id, job_id;
+```
+
+<Image alt="cube" src="/static/images/cube실행.jpg" width={500} height={1000} />
+
+실행된 결과를 보면 CUBE는 ROLLUP과 달리 인자 두개(department_id,job_id)에 대한 그룹을 집계해준다. 총계는 하나로 나온다.
+
+<h4>GROUPING SETS</h4>
+GROUPING SETS는 group by + union all 을 결합한 기능이다. GROUPING SETS안의 정의된 열들을(department_id,
+job_id) 각각 group by 해서 union all을 실행해준 결과를 출력한다. 때문에 select문이 간결해지고 성능 또한
+빨라진다. 이때 표시된 인수들간의 관계는 평등하므로 인수의 순서가 바뀌는 것은 상관없다.
+
+위 sql 구문에서 grouping sets로 변경하여 출력한 구문이다. <br/>
+
+```
+select department_id, job_id, avg(salary)
+from hr.employees
+group by grouping sets(department_id, job_id)
+order by department_id, job_id;
+```
+
+<Image alt="GROUPING SETS" src="/static/images/groupingsets실행.jpg" width={500} height={700} />
+
+GROUPING SETS 함수 사용시 괄호로 묶은 집합별로(하나의 데이터로 간주함) 집계를 구할 수 있다. <br/> 따라서 group by grouping sets(department_id, job_id)은 group by grouping sets((department_id), (job_id))와 동일결과가 나온다.
+동일쿼리에 괄호를 하나 더 추가하여((department_id, job_id)) 실행했다.
+
+```
+select department_id, job_id, avg(salary)
+from hr.employees
+group by grouping sets((department_id, job_id))
+order by department_id, job_id;
+```
+
+<Image alt="GROUPING SETS" src="/static/images/groupingsets실행2.jpg" width={500} height={400} />
+
+보다시피, 부서별ID와 job_id를 각각 집계하여 평균연봉을 보여준다. <br/>
+지정된 컬럼에 대한 소계는 볼수 있지만 CUBE나 ROLLUP처럼 총계는 볼수가 없다. 이럴땐 어떻게 할까?
+빈 괄호()를 추가하여 구할 수 있다.
+
+```
+select department_id, job_id, avg(salary)
+from hr.employees
+group by grouping sets((department_id, job_id),())
+order by department_id, job_id;
+```
+
+<Image alt="GROUPING SETS" src="/static/images/groupingsets실행3.jpg" width={350} height={400} />
+<br />
+<br />
+<h4>GROUPING </h4>
+ROLLUP, CUBE, GROUPING SETS 등 새로운 그룹 함수를 지원하기 위해 GROUPING 함수가 추가되었다. group
+by의 확장으로 null 값일 경우 1을 반환하고 저장된 null값이나 다른 값일 경우 0을 반환한다.
+CASE/DECODE를 이용해, 소계를 나타내는 필드에 원하는 문자열을 지정할 수 있다. (DECODE는 표준sql이
+아니므로 CASE WHEN 구문의 사용을 더 권장한다.)
+
+참고로 decode의 사용방법은 아래와 같다.
+
+<Image alt="decode" src="/static/images/decode.jpg" width={500} height={300} />
+
+CASE WHEN형식은 아래와 같다.
+
+<Image alt="CASE WHEN" src="/static/images/CASE WHEN.jpg" width={400} height={160} />
+
+GROUPING과 grouping sets, decode, CASE WHEN을 이용한 sql문이다. <br/>
+grouping(department_id)가 null이면 1이 반환되고 if 1이면 '모든부서'가 출력되고 else 이면 department_id가 출력되는 조건이다.
+
+```
+select
+decode (grouping(department_id),1,'모든부서', department_id) as 부서명,
+decode(grouping(job_id),1,'모든직무',job_id) as 직무명,
+count(\*) as 사원수,
+sum(salary) as 총급여액
+from hr.employees
+group by grouping sets(department_id, job_id);
+```
+
+```
+SELECT
+CASE GROUPING(department_id) WHEN 1 THEN '모든부서' ELSE TO_CHAR(department_id) END AS 부서명,
+CASE GROUPING(job_id) WHEN 1 THEN '모든직무' ELSE TO_CHAR(job_id) END AS 직무명,
+count(\*) AS 사원수,
+sum(salary) as 총급여액
+from hr.employees
+GROUP BY grouping sets(department_id, job_id);
+```
+
+<Image alt="grouping" src="/static/images/grouping.jpg" width={300} height={500} />
+
+<h3>sqld 문제</h3>
+<h4>109번</h4>
+<Image alt="sqld" src="/static/images/sqld109.jpg" width={600} height={400} />
+
+아래 sql구문을 통해 정답을 확인해볼 수 있다.
+
+```
+
+create table 설비 (설비ID number,
+설비명 varchar(25))
+
+insert into 설비 (설비ID, 설비명) values (1, '설비1') ;
+insert into 설비 (설비ID, 설비명) values (2, '설비2') ;
+insert into 설비 (설비ID, 설비명) values (3, '설비3') ;
+
+select \* from 설비;
+
+create table 에너지사용(설비ID number, 에너지코드 varchar(25), 사용량 number );
+
+insert into 에너지사용 (설비ID, 에너지코드, 사용량) values (1, '전기', 100) ;
+insert into 에너지사용 (설비ID, 에너지코드, 사용량) values (1, '용수', 200) ;
+insert into 에너지사용 (설비ID, 에너지코드, 사용량) values (1, '바람', 300) ;
+insert into 에너지사용 (설비ID, 에너지코드, 사용량) values (2, '전기', 200) ;
+insert into 에너지사용 (설비ID, 에너지코드, 사용량) values (2, '용수', 300) ;
+insert into 에너지사용 (설비ID, 에너지코드, 사용량) values (3, '전기', 300) ;
+
+select \* from 에너지사용;
+
+--1번
+select a.설비ID, b.에너지코드, sum(b.사용량) as 사용량합계
+from 설비 a inner join 에너지사용 b
+on (a.설비id = b.설비id)
+group by cube ((a.설비ID), (b.에너지코드), (a.설비ID, b.에너지코드))
+order by a.설비id, b.에너지코드;
+
+--2번
+select a.설비ID, b.에너지코드, sum(b.사용량) as 사용량합계
+from 설비 a inner join 에너지사용 b
+on (a.설비ID = b.설비ID)
+group by cube(a.설비ID, b.에너지코드)
+order by a.설비ID, b.에너지코드;
+
+--3번
+select a.설비ID, b.에너지코드, sum(b.사용량) as 사용량합계
+from 설비 a inner join 에너지사용 b
+on (a.설비ID = b.설비ID)
+group by grouping sets((a.설비ID), (b.에너지코드),(a.설비ID, b.에너지코드),())
+order by a.설비ID, b.에너지코드;
+
+--4번
+select a.설비ID, b.에너지코드, sum(b.사용량) as 사용량합계
+from 설비 a inner join 에너지사용 b
+on (a.설비ID = b.설비ID)
+group by grouping sets((a.설비ID), (b.에너지코드),(a.설비ID, b.에너지코드))
+order by a.설비ID, b.에너지코드;
+
+```
+
+<hr />
+출처 <br />
+https://dataonair.or.kr/db-tech-reference/d-guide/sql/?mod=document&uid=350 <br />
+https://youtube.com/playlist?list=PLY-_9hx4ldZwXbWFdO0aYzt_BS5ss4fyJ&si=EmG-wol4QCUNCsWX <br />
+https://gent.tistory.com/227 <br />
+https://velog.io/@hiy7030/SQLD-SQL-%ED%99%9C%EC%9A%A9-2%ED%9A%8C%EB%8F%85-%EB%AC%B8%ED%92%80-2 <br />
+https://byul91oh.tistory.com/372 <br />
+https://joke00.tistory.com/103
+
+도서 : sqld 자격검정 실전문제, k data 한국데이터산업진흥원
