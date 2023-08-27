@@ -161,7 +161,7 @@ group by grouping sets(department_id, job_id);
 SELECT
 CASE GROUPING(department_id) WHEN 1 THEN '모든부서' ELSE TO_CHAR(department_id) END AS 부서명,
 CASE GROUPING(job_id) WHEN 1 THEN '모든직무' ELSE TO_CHAR(job_id) END AS 직무명,
-count(\*) AS 사원수,
+count(*) AS 사원수,
 sum(salary) as 총급여액
 from hr.employees
 GROUP BY grouping sets(department_id, job_id);
@@ -184,7 +184,7 @@ insert into 설비 (설비ID, 설비명) values (1, '설비1') ;
 insert into 설비 (설비ID, 설비명) values (2, '설비2') ;
 insert into 설비 (설비ID, 설비명) values (3, '설비3') ;
 
-select \* from 설비;
+select * from 설비;
 
 create table 에너지사용(설비ID number, 에너지코드 varchar(25), 사용량 number );
 
@@ -195,7 +195,7 @@ insert into 에너지사용 (설비ID, 에너지코드, 사용량) values (2, '�
 insert into 에너지사용 (설비ID, 에너지코드, 사용량) values (2, '용수', 300) ;
 insert into 에너지사용 (설비ID, 에너지코드, 사용량) values (3, '전기', 300) ;
 
-select \* from 에너지사용;
+select * from 에너지사용;
 
 --1번
 select a.설비ID, b.에너지코드, sum(b.사용량) as 사용량합계
