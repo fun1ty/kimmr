@@ -61,7 +61,7 @@ order by department_id, job_id;
 ```
 
 아래는 실행된 결과이다. <br/>
-ROLLUP은 첫번째 인자(department_id)에 대해서면 소계를 생성해주기 때문에 department_id 그룹을 기준으로 소계 및 합계가 생긴것을 확인할 수 있다.
+ROLLUP은 첫번째 인자(department_id)를 기준으로 소계를 생성해주기 때문에 department_id 그룹을 기준으로 소계 및 합계가 생긴것을 확인할 수 있다.
 
 <Image alt="rollup" src="/static/images/ROllUP실행.jpg" width={500} height={600} />
 <br />
@@ -151,7 +151,7 @@ grouping(department_id)가 null이면 1이 반환되고 if 1이면 '모든부서
 select
 decode (grouping(department_id),1,'모든부서', department_id) as 부서명,
 decode(grouping(job_id),1,'모든직무',job_id) as 직무명,
-count(\*) as 사원수,
+count(*) as 사원수,
 sum(salary) as 총급여액
 from hr.employees
 group by grouping sets(department_id, job_id);
