@@ -131,10 +131,28 @@ order by department_id, job_id;
 <br />
 <br />
 <h4>GROUPING </h4>
-ROLLUP, CUBE, GROUPING SETS 등 새로운 그룹 함수를 지원하기 위해 GROUPING 함수가 추가되었다. group
-by의 확장으로 그룹함수에 의해 컬럼값이 소계나 총합 등 집계된 데이터일 경우 1을 반환하고 그게 아닌
-경우 0을 반환한다. CASE/DECODE를 이용해, 소계를 나타내는 필드에 원하는 문자열을 지정할 수 있다.
-(DECODE는 표준sql이 아니므로 CASE WHEN 구문의 사용을 더 권장한다.)
+위에서 보다시피 그룹함수로 구한 소계나 총계는 null('-')로 출력되어 이게 소계를 구한것인지 그냥
+null값인지 알수가 없는 사태가 벌어진다. 이런 문제를 막고자 GROUPING 함수가 추가되었다. group by의
+확장으로 그룹함수에 의해 컬럼값이 소계나 총합 등 집계된 데이터일 경우 1을 반환하고 그게 아닌 경우
+0을 반환한다. CASE/DECODE를 이용해, 소계를 나타내는 필드에 원하는 문자열을 지정할 수 있다. ROLLUP,
+CUBE, GROUPING SETS 함수로 된 집계를 구분하기위해 쓰이는 것으로 group by로 취합한 값은 집계데이터로
+판단하지 않아 null로 취급된다. NVL이나 COALESCE 함수를 사용하여 칼럼값을 대체해주면 되지 않나? 라는
+의문이 생길수 있으나 nvl의 문제는 아래와 같다.
+
+```
+select COALESCE(department_id || '', '소계') as department_id ,COALESCE(job_id, '소계') as job_id,
+round(avg(salary),2), count(*)
+from hr.employees
+group by rollup(department_id, job_id)
+order by department_id, job_id;
+
+```
+
+<Image alt="COALESCE" src="/static/images/COALESCE.jpg" width={350} height={600} />
+
+소계는 물론 총계와 원래 department_id와 job_id가 없던 데이터까지 소계로 나왔다. 부정확한 데이터 테이블이 된 셈이다.
+따라서 decode나 CASE/DECODE을 사용하여 집계된 null값을 그루핑한다. (DECODE는
+표준sql이 아니므로 CASE WHEN 구문의 사용을 더 권장한다.)
 
 참고로 decode의 사용방법은 아래와 같다.
 
