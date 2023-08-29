@@ -69,7 +69,7 @@ ROLLUP은 첫번째 인자(department_id)를 기준으로 소계를 생성해주
 <h4>CUBE</h4>
 CUBE는 ROLLUP과 달리 모든 그룹된 데이터에 대해서 집계를 생성한다. CUBE를 사용할 경우에는
 내부적으로는 Grouping Columns의 순서를 바꾸어서 또 한 번의 Query를 추가 수행해야 한다. 뿐만 아니라
-Grand Total(총계)은 양쪽의 Query에서 모두 생성이 되므로 한 번의 Query에서는 제거되어야만 하므로
+Grand Total(총계)은 양쪽의 Query에서 모두 생성이 되어 한 번의 Query에서는 제거되어야만 하므로
 ROLLUP에 비해 시스템의 연산 대상이 많다. 시스템에 많은 부담을 주므로 주의해서 사용해야하며, 계층
 구조인 ROLLUP과는 달리 평등한 관계이므로 인수의 순서가 바뀌는 경우 행간에 정렬 순서는 바뀔 수 있어도
 데이터 결과는 같다.
@@ -167,7 +167,7 @@ from hr.employees
 GROUP BY grouping sets(department_id, job_id);
 ```
 
-<Image alt="grouping" src="/static/images/grouping.jpg" width={300} height={500} />
+<Image alt="grouping" src="/static/images/grouping.jpg" width={300} height={550} />
 
 <h3>sqld 문제</h3>
 <h4>109번</h4>
