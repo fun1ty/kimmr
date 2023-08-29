@@ -154,6 +154,22 @@ order by department_id, job_id;
 따라서 decode나 CASE/DECODE을 사용하여 집계된 null값을 그루핑한다. (DECODE는
 표준sql이 아니므로 CASE WHEN 구문의 사용을 더 권장한다.)
 
+```
+SELECT
+    CASE WHEN grouping(department_id)=1 then '합계'
+    when department_id IS NULL THEN '부서가 없는' ELSE department_id ||'' END AS department_id,
+    CASE WHEN grouping(job_id)=1 then '합계'
+    when job_id IS NULL THEN 'job합계' ELSE job_id END AS job_id,
+    ROUND(AVG(salary), 2),
+    COUNT(*)
+FROM hr.employees
+GROUP BY ROLLUP(department_id, job_id)
+ORDER BY department_id, job_id;
+```
+
+<Image alt="CASE WHEN2" src="/static/images/CASE WHEN2.jpg" width={350} height={600} />
+조건에 따라 원하는 컬럼값으로 치환할 수 있다.
+
 참고로 decode의 사용방법은 아래와 같다.
 
 <Image alt="decode" src="/static/images/decode.jpg" width={500} height={300} />
@@ -161,40 +177,16 @@ order by department_id, job_id;
 CASE WHEN형식은 아래와 같다.
 
 <Image alt="CASE WHEN" src="/static/images/CASE WHEN.jpg" width={400} height={160} />
-
-GROUPING과 grouping sets, decode, CASE WHEN을 이용한 sql문이다. <br/>
-grouping(department_id)가 null이면 1이 반환되고 if 1이면 '모든부서'가 출력되고 else 이면 department_id가 출력되는 조건이다.
-
-```
-select
-decode (grouping(department_id),1,'모든부서', department_id) as 부서명,
-decode(grouping(job_id),1,'모든직무',job_id) as 직무명,
-count(*) as 사원수,
-sum(salary) as 총급여액
-from hr.employees
-group by grouping sets(department_id, job_id);
-```
-
-```
-SELECT
-CASE GROUPING(department_id) WHEN 1 THEN '모든부서' ELSE TO_CHAR(department_id) END AS 부서명,
-CASE GROUPING(job_id) WHEN 1 THEN '모든직무' ELSE TO_CHAR(job_id) END AS 직무명,
-count(*) AS 사원수,
-sum(salary) as 총급여액
-from hr.employees
-GROUP BY grouping sets(department_id, job_id);
-```
-
-<Image alt="grouping" src="/static/images/grouping.jpg" width={300} height={550} />
-
+<br />
+<br />
 <h3>sqld 문제</h3>
-<h4>109번</h4>
+<h4>109번</h4>위 개념을 이용해 출제된 sqld 문제이다.
+
 <Image alt="sqld" src="/static/images/sqld109.jpg" width={600} height={400} />
 
 아래 sql구문을 통해 정답을 확인해볼 수 있다.
 
 ```
-
 create table 설비 (설비ID number,
 설비명 varchar(25))
 
@@ -202,7 +194,7 @@ insert into 설비 (설비ID, 설비명) values (1, '설비1') ;
 insert into 설비 (설비ID, 설비명) values (2, '설비2') ;
 insert into 설비 (설비ID, 설비명) values (3, '설비3') ;
 
-select * from 설비;
+select \* from 설비;
 
 create table 에너지사용(설비ID number, 에너지코드 varchar(25), 사용량 number );
 
@@ -213,7 +205,7 @@ insert into 에너지사용 (설비ID, 에너지코드, 사용량) values (2, '�
 insert into 에너지사용 (설비ID, 에너지코드, 사용량) values (2, '용수', 300) ;
 insert into 에너지사용 (설비ID, 에너지코드, 사용량) values (3, '전기', 300) ;
 
-select * from 에너지사용;
+select \* from 에너지사용;
 
 --1번
 select a.설비ID, b.에너지코드, sum(b.사용량) as 사용량합계
