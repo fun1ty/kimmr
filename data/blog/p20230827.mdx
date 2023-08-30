@@ -159,7 +159,7 @@ SELECT
     CASE WHEN grouping(department_id)=1 then '합계'
     when department_id IS NULL THEN '부서가 없는' ELSE department_id ||'' END AS department_id,
     CASE WHEN grouping(job_id)=1 then '합계'
-    when job_id IS NULL THEN 'job합계' ELSE job_id END AS job_id,
+    when job_id IS NULL THEN '업무번호가 없는' ELSE job_id END AS job_id,
     ROUND(AVG(salary), 2),
     COUNT(*)
 FROM hr.employees
