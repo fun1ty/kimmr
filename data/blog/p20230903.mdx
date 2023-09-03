@@ -1,0 +1,248 @@
+---
+title: 윈도우함수를 알아보자 | sql
+date: '2023-09-03'
+tags: ['sqld', 'sql', '데이터베이스', '윈도우함수', 'WINDOW FUNCTION']
+draft: false
+summary: 윈도우 함수를 이용하여 행과 행 간을 비교, 연산, 정의 할 수 있다.
+images: ['/static/images/profile.png']
+---
+
+❗포스팅 된 쿼리를 확인해보고 싶은데 sqldeveloper나 다른 sql개발환경이 없다면?<br/>
+👉 https://livesql.oracle.com/apex/f?p=590:1000:34265832573802:::::
+
+<h3>Intro</h3>
+sqld를 공부하다가 윈도우 함수에 대해 자세히 알고자 쓰는 포스팅이다. 반드시 출제되는 영역이니 이 참에
+확실히 알아서 막힘없이 문제를 풀고자 하는게 목표이다.
+
+<h3>윈도우 함수란?</h3>
+윈도우 함수란 행과 행간의 관계를 쉽게 정의 하기 위해 만든 함수를 이름으로서 기존에 행과 행간의 관계를
+정의하거나 비교, 연산하는 것은 하나의 SQL 문으로 처리하기 어려운 점을 보완하기 위해 만들어졌다. group
+by와 비슷하게 데이터를 그룹화 하여 집계한다. 하지만 Group By 는 집계된 결과만 보여주는 반면, 윈도우 함수는
+기존 데이터에 집계된 값을 추가하여 나타낸다.
+
+<h3>윈도우 함수 사용법</h3>
+
+```
+SELECT WINDOW_FUNCTION (ARGUMENTS) OVER([PARTITION BY 컬럼] [ORDER BY 컬럼] [WINDOWING 절])
+FROM 테이블명;
+```
+
+- ~에게 : OVER (over은 윈도우 함수에서 꼭 들어가야 하며 Over 내부에 Partition By 절과 Order by 절이 들어간다.)
+- 행을 분할 : partition by(group by 같은 역할)
+- 행을 정렬 : order by(어떤 항목(컬럼)을 기준으로 순위를 정할 지 결정)
+- 행을 지정 : rows 또는 range (where 역할)
+
+<br />
+<strong> 윈도우 함수의 종류 </strong>
+<Image alt="WINDOW_FUNCTION" src="/static/images/윈도우함수.jpg" width={800} height={200} />
+
+\*본 포스팅에서는 rows & range과 그룹 내 비율함수에 대해서만 기술하고자 한다. <br />
+
+{' '}
+{' '}
+
+<strong> 윈도우 함수의 사용예제 </strong>
+
+```
+select job, sal,sum(sal) over(PARTITION BY job
+    ORDER BY sal desc
+    ROWS UNBOUNDED PRECEDING) as sum_sal
+    from SCOTT.emp;
+```
+
+<Image alt="WINDOW_FUNCTION" src="/static/images/윈도우함수사용.jpg" width={330} height={430} />
+
+표 이미지를 보면 job별로 PARTITION BY로 행을 분할하고 sal이 높은순으로 order by 정렬이 되었다. 그리고 ROWS UNBOUNDED PRECEDING로 맨 위행부터 차례로 sum(sal)연산한다. 따라서 직업별 누적연봉합계가 구해진다.
+
+<h3>WINDOWING 절: ROWS 와 RANGE</h3>
+ROWS는 각 행의 위치이고 RANGE는 값의 범위를 선택할 때 사용된다.
+
+<strong>ROWS</strong>
+
+행을 호칭하는 방식은 다음과 같이 정의된다.
+
+<Image alt="WINDOW_FUNCTION" src="/static/images/rows.jpg" width={450} height={280} />
+
+- 현재행을 기준으로 위에 위치한 행: PRECEDING
+- 바로 한칸 위 : 1 PRECEDING
+- 바로 한칸 아래 : 1 FOLLOWING
+- 맨 위의 행: UNBOUNDED PRECEDING
+- 맨 아래의 행 : UNBOUNDED FOLLOWING
+
+<br />
+<strong>ROWS 사용예시</strong>
+<br />- `ROWS 1 PRECEDING`을 이용하여 현재행+한칸위의 행의 연산을 구한다.{' '}
+
+```
+select job, ename, sal,
+sum(sal)over(ORDER BY sal ROWS 1 PRECEDING) as cume_sal from SCOTT.emp;
+```
+
+<Image alt="WINDOW_FUNCTION" src="/static/images/rows_Ex1.jpg" width={380} height={280} />
+
+- `ROWS BETWEEN A AND B`을 이용하여 한칸위+현재행+한칸아래의 행의 연산을 구한다.{' '}
+
+```
+select job, ename, sal,
+    sum(sal)over(ORDER BY sal
+    ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING)
+    as cume_sal
+from  SCOTT.emp;
+```
+
+<Image alt="WINDOW_FUNCTION" src="/static/images/rows_Ex2.jpg" width={400} height={280} />
+
+- `ROWS UNBOUNDED PRECEDING`: 시작점만 적은 경우, 맨 위행~ 현재행까지 자동연산된다.
+- `ROWS UNBOUNDED FOLLOWING`: 끝점만 적은 경우, 현재행~맨아래행까지 자동연산된다.
+
+<br />
+<strong>RANGE</strong>
+<br />
+값을 기준으로 연산에 참여할 행을 선택한다.{' '}
+
+- `RANGE PRECEDING`: 현재행 보다 작은값을 선택적으로 찾아 연산한다.
+
+```
+select job, ename, sal,
+    sum(sal)over(ORDER BY sal
+    RANGE 150 PRECEDING)
+    as cume_sal
+from  SCOTT.emp
+where job = 'CLERK' or job = 'SALESMAN';
+```
+
+<Image alt="WINDOW_FUNCTION" src="/static/images/range_Ex1.jpg" width={580} height={280} />
+
+- `RANGE UNBOUNDED PRECEDING`: 현재행(포함)을 기준으로 작은 값들을 모두 선택하여 연산한다.
+- `RANGE BETWEEN 150 PRECEDING AND 150 FOLLOWING`: 현재행 보다 작은 값에서 150 이하로 차이가 나고 현재값 기준으로 큰값에서 150이하로 차이가 나는 행들을 선택하여 연산한다.
+
+<h3>그룹 내 비율함수</h3>
+그룹내에서 찾고자 하는 값의 비율을 나타낸다.
+
+<strong>RATIO_TO_REPORT 함수 </strong>
+<br />
+파티션 내 전체 SUM값에 대한 행별 컬럼값의 백분율을 소수점으로 구할 수 있다.{' '}
+
+```
+select ename,job,sal,
+    round(RATIO_TO_REPORT(SAL)OVER(),2) as ratio
+from SCOTT.emp
+where job = 'SALESMAN';
+```
+
+<Image alt="WINDOW_FUNCTION" src="/static/images/RATIO_TO_REPORT.jpg" width={270} height={200} />
+*RATIO에 .29, .22는 0.29, 0.22 이다. (아마 oracle 라이브sql이라 지원을 안하는 것 같다..){' '}
+
+<strong>PERCENT_RANK 함수 </strong>
+<br />
+파티션 내에서 제일 먼저 나오는 행을 0, 제일 마지막 행을 1로 하여 행의 순서로 백분율을 구한다. (1을
+몇번 잘랐는지)
+
+```
+select deptno, ename, sal,
+   PERCENT_RANK()OVER(PARTITION BY deptno
+    ORDER BY sal desc) as PR
+from  SCOTT.emp;
+```
+
+<Image alt="WINDOW_FUNCTION" src="/static/images/PERCENT_RANK.jpg" width={270} height={400} />
+<br />
+<br />
+<strong>CUME_DIST 함수 </strong>
+<br />
+파티션 별 전체건수에서 본인 자신도 포함하여 작거나 같은 건수에 대해 누적 백분율을 구한다.
+
+```
+select deptno, ename, sal,
+   round(CUME_DIST()OVER(PARTITION BY deptno
+    ORDER BY sal desc),2) as CD
+from  SCOTT.emp;
+```
+
+<Image alt="WINDOW_FUNCTION" src="/static/images/CUME_DIST.jpg" width={480} height={400} />
+<br />
+<br />
+<strong>NTILE 함수 </strong>
+<br />
+TILE(화장실 바닥에 보이는 타일 등)이 N개 있다는 뜻으로 전체 행을 N등분 하여 분배한다.{' '}
+
+```
+select ename,sal,
+    NTILE(4)OVER(ORDER BY sal desc) as tile
+from  SCOTT.emp;
+```
+
+<Image alt="WINDOW_FUNCTION" src="/static/images/ntile.jpg" width={500} height={350} />
+
+<h3>sqld 33회 기출문제 45번</h3>
+NTILE 문제나 범위지정 문제가 자주 출제되는 경향이 있는것 같다. 아래는 NTILE 주관식 문제이다.
+
+문제 45. 주어진 테이블에서 아래의 SQL문을 수행하였을때 결과값이 아래의 결과와 같을때 결과의 (      )에
+들어갈 값을 적으시오.
+
+```
+[SQLD_33_45]
+COL1   COL2    COL3
+---------------------
+A       가       1
+A       가       5
+A       다       10
+B       가       20
+B       나       30
+B       나       100
+C       다       50
+[SQL]
+
+SELECT NTILE_2, COUNT(*) AS CNT
+FROM (
+      SELECT COL1, COL2, COL3, NTILE(3) OVER
+      (ORDER BY COL3) AS NTILE_2
+      FROM SQLD_33_45
+      )
+      WHERE 1=1
+GROUP BY NTILE_2;
+
+[RESULT]
+NTILE_2    CNT
+----------------
+(    )    (    )
+2           2
+3           2
+```
+
+NTILE은 PARTITION BY를 지정하면 해당 파티션 내에서 그룹화를 진행하여 행 번호를 부여한다.<br/>
+아래 sql를 통해 확인해 볼수 있다.
+
+```
+create table SQLD_33_45 ( col1 varchar(2), col2 varchar(3), col3 number);
+
+insert into SQLD_33_45 (col1,col2,col3) values ('A', '가', 1);
+insert into SQLD_33_45 (col1,col2,col3) values ('A', '가', 5);
+insert into SQLD_33_45 (col1,col2,col3) values ('A', '다', 10);
+insert into SQLD_33_45 (col1,col2,col3) values ('B', '가', 20);
+insert into SQLD_33_45 (col1,col2,col3) values ('B', '나', 30);
+insert into SQLD_33_45 (col1,col2,col3) values ('B', '나', 100);
+insert into SQLD_33_45 (col1,col2,col3) values ('C', '다', 50);
+
+select * from SQLD_33_45;
+
+SELECT NTILE_2, COUNT(*) AS CNT
+FROM (
+      SELECT COL1, COL2, COL3, NTILE(3) OVER
+      (PARTITION BY col3 ORDER BY COL3) AS NTILE_2
+      FROM SQLD_33_45
+      )
+      WHERE 1=1
+GROUP BY NTILE_2;
+
+```
+
+정답: 1,3
+
+<hr />
+출처 <br />
+https://schatz37.tistory.com/12#head2 <br />
+https://cheershennah.tistory.com/234 <br />
+https://for-my-wealthy-life.tistory.com/48 <br />
+https://hipster4020.tistory.com/20 <br />
+https://www.youtube.com/watch?v=2ec7S5tlGSI&t=1672s
