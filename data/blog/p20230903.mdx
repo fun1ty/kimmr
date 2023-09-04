@@ -80,7 +80,7 @@ sum(sal)over(ORDER BY sal ROWS 1 PRECEDING) as cume_sal from SCOTT.emp;
 
 <Image alt="WINDOW_FUNCTION" src="/static/images/rows_Ex1.jpg" width={380} height={280} />
 
-- `ROWS BETWEEN A AND B`을 이용하여 한칸위+현재행+한칸아래의 행의 연산을 구한다.{' '}
+- `ROWS BETWEEN A AND B`을 이용하여 시작점과 끝점을 정하여 행의 연산을 구한다.{' '}
 
 ```
 select job, ename, sal,
