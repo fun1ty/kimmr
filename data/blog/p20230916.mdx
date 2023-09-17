@@ -1,0 +1,278 @@
+---
+title: 공유주차장(주차하카) 서비스 | 2차 프로젝트 후기
+date: '2023-09-16'
+tags: ['[포스코x코딩온] 웹개발자 풀스택 과정', 'project', 'node.js', 'javascript', 'nginx', 'AWS']
+draft: false
+summary: 2차프로젝트 후기
+images: ['/static/images/주차하카.svg ']
+---
+
+<strong>프로젝트 깃허브 주소</strong> 👉 https://github.com/fun1ty/letsPark <br />
+<strong>프로젝트 배포</strong> ⚡ https://http://52.78.196.104//
+
+<h2>Intro</h2>
+시간이 지나면서 '공유'에 대한 가치가 커지고 그것을 잘 활용할 수 있는 곳 중 하나인 공유 주차장을 생각하였다. <br />
+주제를 선정하고 찾아보니 이미 잘 만들어진 서비스가 여러개 있어서 다른 주제를 생각할까 고민하다가
+다른 서비스들에는 없는 차별화된 기능을 넣어서 개발하자! 라는 팀 논의가 이루어져 '주차하카' 서비스가
+탄생되었다. (참고로 서비스명은 차를 좋아하는 동생이 지어줬다.)
+
+<h2>주차하카 </h2>
+<Image alt="주차하카" src="/static/images/주차하카.svg" width={837} height={282} />
+
+- 수도권에 나날이 늘어가는 주차난과 불법주차를 해소하기 위해 만든 <strong>주차장 공유 서비스</strong>{' '}
+- 단독주택이나 빌라 거주자가 주차공간이 비어있을 때 공간을 대여가능
+
+<h3>개발기간</h3>
+2023.08.31 ~ 2023.09.15 (총 16일)
+
+<h3>주요기능</h3>
+
+- 로그인,회원가입
+
+- 주차장 등록,수정,삭제
+
+- 주차장 예약
+
+- 주차장 주인과 임대자의 채팅
+
+<h3>기능정의서</h3>
+<Image alt="주차하카" src="/static/images/주차하카 기능정의서.jpg" width={800} height={400} />
+
+<h3>CI/CD 아키텍쳐</h3>
+<Image alt="Ci/Cd" src="/static/images/주차하카 CI_CD.svg" width={837} height={400} />
+
+<h3>ERD 설계</h3>
+<Image alt="Erd" src="/static/images/주차하카 erd.png" width={837} height={600} />
+
+<h3>앤드포인트</h3>
+많아서 일부분만 발췌하였다.
+
+| 분류 | 이름     | method | URL          | Request Parameter |
+| ---- | -------- | ------ | ------------ | ----------------- |
+| 메인 | 메인     | GET    | /            | -                 |
+| 회원 | 로그인   | POST   | /user/login  | 요청데이터        |
+| 회원 | 로그아웃 | POST   | /user/logout | 요청데이터        |
+
+요청 및 응답데이터는 아래와 같은 형식으로 정의하였다.
+
+<strong>
+  <u>본문 파라미터</u>
+</strong>
+
+| 이름     | 유형   | 필수/선택 | 설명                   |
+| -------- | ------ | --------- | ---------------------- |
+| email    | string | 선택      | 수정하려는 이메일 주소 |
+| password | string | 선택      | 수정하려는 비밀번호    |
+| nickname | string | 선택      | 수정하려는 닉네임      |
+
+<strong>
+  <u>응답</u>
+</strong>
+
+| Name | 응답 본문                                                 |
+| ---- | --------------------------------------------------------- |
+| 200  | `{ “message” : “회원 정보가 성공적으로 수정되었습니다. }` |
+| 400  | `{”error”:”인증 실패”} `                                  |
+
+<strong>
+  <u>코드 예시</u>
+</strong>
+요청
+|                                                                                                   |
+| ------------------------------------------------------------------------------------------------- |
+| `{"email" : "새로운 이메일 주소", "password" : "새로운 비밀번호", "nickname" : "새로운 닉네임" }` |
+
+<h3>기술스택</h3>
+
+- node.js, javascript, nginx, Mysql, AWS
+
+<h3>내가 맡은 역할</h3>
+
+- nginx와 aws로 서버 배포(DB는 Mysql과 RDB 사용 )
+- 깃허브 리포지토리 및 브랜치 세팅
+- node.js로 개발하는데 필요한 모든 라이브러리 설치하고 mvc 패턴의 개발환경 빌드
+- 채팅기능 구현
+
+<h3>기능구현(채팅)</h3>
+socket.io 라이브러리를 이용하여 실시간 채팅기능을 구현하였다. 주차장 상세페이지에서 '주인과 채팅하기'버튼을
+클릭하면 socket.on()으로 채팅방을 만들어지고 채팅을 시작하면 RDB에 모든 채팅내역이 저장되고 불러올때는
+createdAt 기준으로 시간을 출력한다. 이때 만들어진 채팅방은 마이페이지> 채팅방에서 내역을 확인 할 수 있다.
+사실 채팅내역 불러오는 게 가장 어려웠던 작업이였는데 구현되어 기뻤다. 이 부분은 코드를 아래에 첨부한다.
+(번외로 배포서버에는 웹소켓이 자꾸 끊겨 결국 로컬로 시연할 수 밖에 없었다.){' '}
+
+```
+<서버단 >
+
+const history = await chatHistory(socket.room);
+        if (history) {
+          // 이 부분에서 방에 입장한 모든 사용자에게 채팅 내역을 전송
+          const userIdFind = await chatUserFind(socket.room);
+          let UserResult;
+          if (userId != userIdFind.userid) {
+            UserResult = await UserInfo(userIdFind.userid);
+          } else {
+            UserResult = await UserInfo(userIdFind.joinuser);
+          }
+          UserResult = await UserInfo(userIdFind.userid);
+          // io.to(socket.room).emit("history", history, UserResult);
+          // 해당 방의 모든 클라이언트에게 채팅 내역 전송
+          rooms[socket.room].forEach((clientSocket) => {
+            // 클라이언트 소켓의 UserId와 현재 클라이언트의 UserId가 같으면 채팅 내역 전송
+            if (clientUserIds[clientSocket.id] === userId) {
+              clientSocket.emit("history", history, UserResult);
+            }
+          });
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  );
+
+  socket.on("findHistory", async (roomId, userId, lastMessageId) => {
+    const userIdFind = await chatUserFind(roomFind.id);
+    let UserResult;
+    if (userId != userIdFind.userid) {
+      UserResult = await UserInfo(userIdFind.userid);
+    } else {
+      UserResult = await UserInfo(userIdFind.joinuser);
+    }
+    // if (!requestedHistories[userId]) {
+    const history = await chatHistory(roomId, lastMessageId);
+    if (!history) {
+      console.log("historyNull");
+    } else {
+      console.log("aaaa", roomId);
+      io.to(roomId).emit("history", history, UserResult);
+    }
+  });
+
+  //채팅 히스토리
+  async function chatHistory(roomId, lastMessageId) {
+    const Condition = {
+      roomid: roomId,
+    };
+
+    if (lastMessageId !== null) {
+      Condition.id = { [Op.gt]: lastMessageId };
+    }
+    const history = await models.Chat.findAll({
+      where: Condition,
+      order: [["createdAt", "DESC"]],
+    });
+
+    return history;
+  }
+};
+
+```
+
+```
+<클라이언트>
+
+//방 번호 가져오기
+      socket.on("roomNumber", (roomNumber) => {
+        const getItem = localStorage.getItem("userid");
+        console.log("getItem", getItem);
+        console.log(roomId);
+        if (!roomId) {
+          roomId = roomNumber;
+        }
+
+        //채팅내역 불러오기(방번호가 있어야 내역찾기 가능)
+        socket.emit("findHistory", roomNumber, getItem, lastMessageId);
+      });
+
+//채팅내역
+      socket.on("history", (historyChat, UserResult) => {
+        console.log("historyChat", historyChat[0], chatHistoryRequested);
+
+        if (historyChat && historyChat.length > 0) {
+          for (let i = 0; i < historyChat.length; i++) {
+            const div = document.createElement("div");
+            const p = document.createElement("p");
+            const time = document.createElement("p");
+            const span = document.createElement("span");
+            const img = document.createElement("img");
+            const getItem = localStorage.getItem("userid");
+            const chat = historyChat[i];
+            // if (chat.id < lastMessageId) {
+            //   continue;
+            // } else {
+            if (chat) {
+              if (chatHistoryRequested == false) {
+                if (chat.FILE != null) {
+                  // 파일이 있는 경우
+                  p.innerHTML = chat.FILE;
+                } else {
+                  p.textContent = chat.content;
+                }
+                if (chat.userid == getItem) {
+                  div.classList.add("my-chat");
+                  time.textContent = chat.createdAt;
+                  time.id = "chatTime";
+                  div.appendChild(time);
+                  p.id = "chatText";
+                  span.appendChild(p);
+                  div.appendChild(span);
+                } else {
+                  div.classList.add("other-chat");
+                  span.innerHTML = `<span id="nick">${UserResult.nickname}</span>`; // 닉네임 추가
+                  p.innerHTML = `<p id="othermessage">${chat.content}</p>`;
+                  time.textContent = chat.createdAt;
+                  time.id = "otherChatTime";
+                  img.src = UserResult.profile;
+                  img.style.width = "50px";
+                  img.id = "profile";
+                  span.appendChild(img);
+                  span.appendChild(p);
+                  span.appendChild(time);
+                  div.appendChild(span);
+                }
+                historyChatDiv.insertBefore(div, historyChatDiv.firstChild);
+                lastMessageId = chat.id;
+              }
+            }
+          }
+        }
+        chatHistoryRequested = true;
+        // }
+      });
+
+
+```
+
+<h3>추가개발/개선사항</h3>
+발표 후 피드백 받은 사항으로는 아래와 같다.{' '}
+
+<strong>
+  <u>good</u>
+</strong>
+
+- PPT에 CI/CD가 있고, ERD, 기능명세서 등이 있어 서비스의 흐름을 파악할 수 있어서 좋았다.
+- 서비스에 적합한 모바일 ui로 구현한게 좋았다.
+
+<strong>
+  <u>bad</u>
+</strong>
+
+- 채팅기능이 배포서버에서 돌아가지 않는것이 아쉽다.
+
+<strong>
+  <u>develop</u>
+</strong>
+
+- 사기를 인증하는 신고기능이 필요한 거 같다.
+
+<h2>Review</h2>
+최근 sqld 자격증시험을 보고 바로 프로젝트를 진행하여 몇주간 정신없는 일상이였다. <br />
+프로젝트 기간이 약 2주정도 됐었는데, 첫째주 토요일은 sqld 시험이라 1주는 거의 통으로 날렸다. (하루
+5시간밖에 투자를 못했으니...다행이 팀원들이 이런 사정을 이해해주어서 다행이였다.) 서버배포 또한 원인
+파악하느라 3일을 잡아먹었다. 그리고 개발이 시작되자, socket.io 라이브러리를 파악하고 작동원리를
+이해하는 것에 시간이 소요되었다. (지금도 잘 모르겠다.) DB에 저장된 채팅내역 불러오는게 가장 큰
+시간이 걸렸고 힘든 작업이였으나, 구현하고 나서의 뿌듯한 감정 역시 비례적이였다. 채팅기능은 교육과정
+시작 전부터 가장 만들고 싶었던 기능이였으므로 이번 프로젝트 역시 좋은 경험이였고 많은 것을 배웠다고
+생각한다. (참고로 5개의 팀 중 2등을 해서 더 기분이 좋다.) 로직적으로 오류사항이 확인되어 개선하고
+파일전송기능, 채팅방 알람기능 또한 차츰 구현할 예정이다. 또한 이번에도 팀원운이 좋아 좋은 분들을
+만나서 많은걸 배우고 익힐 수 있었다. 다음주부터는 리액트를 배우는데 가장 배우고싶었던 라이프러리라
+역시 기대가 된다.{' '}
