@@ -1,9 +1,9 @@
 ---
 name: Kim MiRi
 avatar: /static/images/profile.png
-occupation: Professor of Atmospheric Science
-company: Stanford University
-email: address@yoursite.com
-linkedin: https://www.linkedin.com
+occupation: 2차 전직중
+company: null
+email: oummm0111@gmail.com
+linkedin: null
 github: https://github.com/fun1ty
 ---
