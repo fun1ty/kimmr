@@ -1,7 +1,7 @@
 const siteMetadata = {
-  title: '공사중인 blog',
+  title: '축적중인 blog',
   author: 'Kim miri',
-  headerTitle: '공사중인 blog',
+  headerTitle: '축적중인 blog',
   description: '2차 전직중 ',
   language: 'en-us',
   theme: 'system', // system, dark or light
