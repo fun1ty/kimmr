@@ -1,0 +1,426 @@
+---
+title: Full Stack Mini project | React, node.js
+date: '2023-10-09'
+tags: ['[포스코x코딩온] 웹개발자 풀스택 과정', 'React', 'node.js', 'MVC', 'MySQL']
+draft: false
+summary: React와 node.js를 사용해 나만의 Todo app을 만들어보자
+---
+
+<strong>프로젝트 깃허브 주소</strong> 👉 https://github.com/fun1ty/TodoApp <br />
+
+<h2>Intro</h2>
+추석때 과제로 미니프로젝트가 주어져 하게되었다. 서버까지 띄우진 못했는데 조만간 띄울 생각이다. 프로젝트
+구성은 MVC패턴으로 React로는 프론트, node.js로 back단을 구성했고 sequelize로 DB를 정의하였다. 그리고
+style-component로 리액트 컴포넌트에 스타일을 적용하였다.
+
+<h2>요구사항</h2>
+프로젝트 요구사항은 아래와 같다.
+
+<h3>백엔드</h3>
+
+1. 테이블 구조
+   |Field|Type|Null|Key|Default|Extra|
+   |----|----|----|----|----|----|
+   |id|int|No|PRI|NULL|auto_increment|
+   |title|varchar(100)|No||NULL||
+   |done|tinyint(1)|No||0||
+
+2. REST API
+
+- `GET /todos` - show all todos
+- `POST /todo` - create a new todo
+- `PATCH /todo/:todoId` -edit a specific todo
+- `DELETE /todo/:todoId` -remove a specific todo
+
+<h3>프론트엔드</h3>
+
+1. Todo 컴포넌트 생성
+2. Todo 추가할 UI 제작 - input에 text 입력 후 버튼(and 엔터키) 클릭시 추가
+3. Todo 삭제 - 삭제버튼으로 목록 삭제
+4. Todo 수정 - 체크박스에 체크해서 done값 변경, 할일 목록 클릭 시 수정이 가능하며 엔터키 클릭 시 입력내용 저장
+
+<h2>그렇게 만들어진 Todo app</h2>
+기본적인 CRUD가 가능하도록 구현하였다. 이미 등록된 To-do List와 동일한 내용을 입력하면 알림창이 뜨며
+등록이 되지 않는다.
+<Image alt="todo-app" src="/static/images/리액트,노드 미니 프로젝트.gif" width={400} height={400} />
+
+DB엔 이런식으로 들어간다.
+
+<Image
+  alt="todo-app_DB"
+  src="/static/images/리액트,노드 미니프로젝트DB.svg"
+  width={400}
+  height={100}
+/>
+
+<h2>디렉토리 구조</h2>
+node.js 로 폴더를 먼저 세팅하고 그 안에 리액트 파일을 넣었다. 어차피 보여지는 페이지는 하나라 라우터
+파일을 따로 분리할 필요성을 느끼지 못해 server.js에 한꺼번에 경로를 정의하였다.
+
+```
+C:.
+│ .gitignore  //node.js
+│ package-lock.json
+│ package.json
+│ server.js
+│
+├─client //리액트폴더
+│ │ .gitignore
+│ │ package-lock.json
+│ │ package.json
+│ │ README.md
+│ │
+│ └─src
+│ App.js
+│ index.js
+│ Router.js
+│ Todo.js
+│
+├─config
+│ config.json
+│
+├─controller
+│ Ctodo.js
+│
+├─models
+│ index.js
+│ Todo.js
+│
+└─src
+setupProxy.js
+
+```
+
+환경세팅이 어느정도 완료되면 이제 이런 생각이 든다.
+디렉토리는 구성되었고 이제 React와 node.js는 어떻게 데이터를 주고 받을 수 있을까? React는 기본포트가 3000번이고 node는 8000번인데? 그래서 아래와 같은 방법으로 해결하였다.
+
+<h2>React와 node.js 연결하기</h2>
+<h3>1. package.json 세팅</h3>
+데이터가 계속 통신이 안되서 이것저것 찾아보니까 리액트 package.json에 통신할 서버를 정의해줘야한다고
+한다. 그래서 아래와 같이 `"proxy": "http://localhost:8000"`를 추가하여 node.js서버 주소를
+넣어주었다. (node의 package.json에는 넣지 않는다. 사실 계속 안되길래 src/setupProxy.js 파일을 만들어
+리액트 서버주소를 넣었으나 없어도 잘 된다. 안되었던건 app.post("/todo", (req, res) 같이 app으로
+연결했어야 했는데 router.post 로 연결해서 계속 데이터가 통신이 되지 않았던 거였다...)
+
+```
+{
+  "name": "client",
+  "version": "0.1.0",
+  "private": true,
+  "proxy": "http://localhost:8000"
+  }
+```
+
+<h3>2. server.js 세팅(node.js)</h3>
+
+todo/src/server.js를 아래와 같이 설정한다. node의 파일이다.
+리액트와 node가 서로 통신을 하려면`npm install cors`로 cors를 설치한다. cors는 (Cross-Origin Resource Sharing)으로 처음 리소스를 제공한 도메인(Origin)이 현재 요청하려는 도메인과 다르더라도 요청을 허락해주는 웹 보안 방침이다. cors 세팅에 대한 자세한 내용은 https://www.npmjs.com/package/cors 여기에서 확인 할 수 있다.
+
+코드에 주석으로 설명을 추가하였다.
+
+```
+const http = require("http");
+const express = require("express");
+const db = require("./models");
+const cors = require("cors");
+const controller = require("./controller/Ctodo");
+
+const PORT = 8000;
+const app = express();
+const server = http.createServer(app);
+
+//body-parser
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "PATCH", "DELETE"],
+    credentials: true,
+  })
+);
+app.use(express.urlencoded({ extended: true }));
+
+app.use(express.static(__dirname + "/client/build")); //리액트 빌드 파일 등록
+(그래야 리액트가 화면을 그려줌)
+
+app.get("/todo", (req, res) => { //axios로 보내준 데이터를 controller로 연결
+  controller.ToDoList(req, res);
+});
+
+app.post("/todo", (req, res) => {
+  controller.ToDoCreate(req, res);
+});
+
+app.patch("/todo/:id", (req, res) => {
+  controller.ToDoUpdate(req, res);
+});
+
+app.delete("/todo/:id", (req, res) => {
+  controller.ToDoDelete(req, res);
+});
+
+app.get("*", function (req, res) {
+  res.sendFile(path.join(__dirname, "/client/build/index.html"));
+}); //모든 경로는 리액트 빌드의 index.html로 열리게 설정
+
+//server start
+db.sequelize.sync({ force: false }).then(() => {
+  server.listen(PORT, () => {
+    console.log(`http://localhost:${PORT}`);
+  });
+});
+
+```
+
+<h2>본격적으로 개발하기</h2>
+
+일일히 모든 코드를 다 적기보다는 특정한 부분만 작성하고자 한다. (상세코드는 위 깃허브주소로 들어가면
+확인이 가능하다.) 모든 구문은 비동기처리를 하였다.
+
+<h3>useEffect Hook으로 라이프사이클 관리</h3>
+useEffect Hook으로 화면이 가장 처음 랜더링 시 DB에 값이 있으면 가져오게 구현하였다.
+
+```
+//리액트
+useEffect(() => {
+    const axiosGetData = async () => {
+      const res = await axios({
+        method: "GET",
+        url: "http://localhost:8000/todo",
+      });
+      console.log(res);
+      const newTodos = res.data.toDoList.map((value) => ({
+        id: value.id,
+        title: value.title,
+        done: value.done,
+        checked: false,
+      }));
+
+      setTodos((prevTodos) => [...prevTodos, ...newTodos]);
+    };
+    axiosGetData();
+  }, []);
+```
+
+```
+//controller(node.js)
+exports.ToDoList = async (req, res) => {
+  try {
+    const toDoList = await Todo.findAll({});
+    if (!toDoList) {
+      res.send({ data: null });
+    } else {
+      res.send({ toDoList });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+```
+
+<h3>useState Hook으로 상태관리</h3>
+To-do List 추가 기능은 아래와 같다. useState 함수에 값이 변경되면 state 변수나 혹은 배열에 변경된 값을
+넣어준다.{' '}
+
+```
+const [todos, setTodos] = useState([]);
+const [inputTodo, setInputTodo] = useState("");
+```
+
+```
+// 화면에 있는 input
+<_writeDiv>
+        <_Input
+          type="text"
+          value={inputTodo}
+          onChange={(e) => setInputTodo(e.target.value)}
+          placeholder="Add Todo here"
+        />
+        <_button onClick={addTodo}>+</_button>
+      </_writeDiv>
+
+```
+
+```
+// input에 할일 입력 후 '+'버튼 누르면 addTodo함수 실행
+const addTodo = () => {
+    if (inputTodo !== "") {
+      const axiosTodoUp = async () => {
+        const data = {
+          title: inputTodo,
+          done: 0,
+        };
+        try {
+          const res = await axios({
+            method: "POST",
+            url: "http://localhost:8000/todo",
+            data: data,
+          });
+          console.log(res);
+          if (res.data && res.data.data) {
+            const newTodo = {
+              id: res.data.id,
+              title: inputTodo,
+              checked: false,
+              done: res.data.done,
+            };
+            console.log(todos);
+            setTodos([...todos, newTodo]);
+            setInputTodo("");
+          } else {
+            alert("이미 있는 목록입니다.");
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      };
+      axiosTodoUp();
+    }
+  };
+```
+
+```
+//controller(node.js)
+
+exports.ToDoCreate = async (req, res) => {
+  try {
+    const { title, done } = req.body;
+
+    const titleInfo = await Todo.findOne({
+      where: { title: title },
+    });
+    if (!titleInfo) {
+      const result = await Todo.create({
+        title: title,
+        done: done,
+      });
+      if (result) {
+        res.send({ data: result });
+      }
+    } else {
+      res.send({ data: false });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+```
+
+수정기능은 To-do List 수정 후 엔터키를 누르면 editUpdateTodo 함수가 작동되도록 구현하였다.
+
+```
+//To-do 입력 목록창
+<_ListInput
+      type="text"
+      value={todo.title}
+      onKeyDown={(e) => enterkey(todo.id, e)}
+      onChange={(e) => titleChange(todo.id, e.target.value)}
+    />
+```
+
+```
+// 엔티키 함수 작동 후 목록 수정 함수 작동
+const enterkey = async (id, e) => {
+    if (e.key === "Enter") {
+      await editUpdateTodo(id, e.target.value);
+    }
+  };
+
+  const editUpdateTodo = async (id, title) => {
+    setReadOnly(false);
+    console.log("id", id);
+    const data = {
+      id: id,
+      title: title,
+      done: 1,
+    };
+    try {
+      const res = await axios({
+        method: "PATCH",
+        url: `http://localhost:8000/todo/${id}`,
+        data: data,
+      });
+      // 편집 모드 종료 및 상태 업데이트
+      if (res) {
+        const updatedTodos = todos.map((todo) =>
+          todo.id === id ? { ...todo, title: title, done: 0 } : todo
+        );
+        setTodos(updatedTodos);
+        setReadOnly(true);
+      }
+    } catch (error) {
+      console.error("에러 발생: ", error);
+    }
+  };
+```
+
+```
+//controller(node.js)
+exports.ToDoUpdate = async (req, res) => {
+  try {
+    const { id, title, done } = req.body;
+    const idInfo = await Todo.findOne({
+      where: { id: id },
+    });
+    if (idInfo) {
+      const result = await Todo.update(
+        { title: title, done: done },
+        { where: { id: id } }
+      );
+      if (result) {
+        res.send({ result });
+      }
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+```
+
+<h3>Styled-Components</h3>
+Styled Components로 컴포넌트를 스타일 하였다. 그 중에서 체크박스를 꾸미는 방법을 작성하고자 한다. <br />
+아래 이미지는 체크박스 클릭 시 변경되는 스타일이다.{' '}
+
+<Image alt="todocheck" src="/static/images/todocheck.png" width={400} height={65} />
+
+```
+// 체크박스가 뜨는 부분
+{todos.map((todo) => {
+          return (
+            <_li key={todo.id} id={todo.id}>
+                <HiddenCheckBox
+                  type="checkbox" //체크박스
+                  id={`custom-checkbox-${todo.id}`}
+                  checked={todo.checked}
+                  onChange={() => checkedTodo(todo.id)}
+                />
+
+```
+
+```
+// 체크박스 style-component 부분
+const HiddenCheckBox = styled.input`
+  appearance: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 1.5px solid gainsboro;
+  border-radius: 0.35rem;
+
+  &:checked { //체크되었을 때 부분
+    border-color: transparent;
+    background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M5.707 7.293a1 1 0 0 0-1.414 1.414l2 2a1 1 0 0 0 1.414 0l4-4a1 1 0 0 0-1.414-1.414L7 8.586 5.707 7.293z'/%3e%3c/svg%3e");
+    background-size: 100% 100%;
+    background-position: 50%;
+    background-repeat: no-repeat;
+    background-color: #6499e9;
+  }
+`;
+```
+
+<h2>As a result</h2>이 과제 덕분에 Hook의 사용법을 조금은 다룰수 있게 된거같다. 그리고 node.js와의
+연결해서 같이 개발해볼 수 있어서 참 괜찮은 시간이였다. 그동안 리액트 공부를 많이 못했는데
+개인프로젝트를 하면서 복습 겸 이것저것 많이 활용해볼 생각이다.{' '}

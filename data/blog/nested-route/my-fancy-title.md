@@ -67,20 +67,19 @@ export default projectsData
 ```
 
 ---
-
 title: Hook이란? | React
-date: '2023-09-24'
+date: '2023-10-09'
 tags: ['[포스코x코딩온] 웹개발자 풀스택 과정', 'React']
 draft: false
 summary: Hook으로 class없이 React의 기능을 사용할 수 있다.
 images: [src: '/static/images/주차하카.svg']
-
 ---
 
 <h2>Intro</h2>
-리액트를 배운지 일주일이 지났다. 자바스크립트를 대충 아는 상태에서 리액트를 접하니 쉽지는 않다. 나름의
-복습을 하고는 있느나, 정처기 시험이 코앞이라(10/7) 시간을 많이 할애하지 못하는 점이 아쉽다. 그러나 글을
-통한 체화과정은 놓칠수 없기에 새로 배운 리액트 Hook을 포스팅하고자 한다.{' '}
+사실 이 포스팅은 09/24일에 쓰고 멈춰진 것을 이어서 쓰는 것이다. 정처기 시험과 해커톤으로 인해 시간을
+들여 작성을 하기가 쉽지 않았다. 성격상 사소한것이라도 알아보고 적는게 마음이 편한데다가 포스팅 하나 작성하는데
+짧게는 일주일 길게는 이주정도 걸리는 편이기 때문이다. 그래서 리액트 훅을 배운지는 꽤 지났으나 지금에서야
+작성하게 된다.
 
 <h3>Hook이란?</h3>
 공식문서와 수업때 배운 내용을 종합해 보자면, Hook은 class형 컴포넌트에서 사용할 수 있던 상태관리와 생명주기
@@ -113,10 +112,25 @@ images: [src: '/static/images/주차하카.svg']
 const [status, setStatus] = useState("초기값");
 ```
 
-<h3>Hook의 사용법</h3>
+<h3>state Hook의 사용법</h3>
+
+```
+import { useState, useCallback } from "react";
+
+export default function ParentComponent() {
+  const [count, setCount] = useState(0);
+  const [inputValue, setinputValue] = useState("");
+
+  const incrementCount = useCallback(() => {
+    console.log("incrementCount");
+    setCount((prevCount) => prevCount + 1);
+  }, [count]);
+}
+```
 
 <h3>As a result...</h3>
 
 <hr />
 출처 <br />
 https://ko.legacy.reactjs.org/docs/hooks-overview.html
+

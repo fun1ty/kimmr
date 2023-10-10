@@ -15,7 +15,7 @@ const TocSide = () => {
   return (
     <div>
       <div className="lg-block hidden pt-6 pb-10 text-gray-500 dark:text-gray-400 xl:border-b xl:border-gray-200 xl:pt-11 xl:dark:border-gray-700">
-        <span className="font-bold text-gray-600  dark:text-gray-300">Table of Contents</span>
+        <span className="font-bold text-gray-600  dark:text-gray-300">목차</span>
         <div className="toc"></div>
       </div>
     </div>
